@@ -82,29 +82,8 @@ def verify(signature, data, public_key):
     except InvalidSignature:
         return False
 
-# def block_orderer():
-#     block_hashes = {}
-#     prev_blocks = {}
-# 
-#     """Print out hash of the block, its ID, and the hash of its preivous."""
-#     blocks = ['block0', 'block1530', 'block2398', 'block3312', 'block7123']
-#     for i in blocks:
-#         with open(i, 'rb') as f:
-#             f_bytes = f.read()
-#             f_hash = sha256(f_bytes)
-#             block_hashes[i] = f_hash
-#             prev_blocks[i] =  json.loads(f_bytes.decode( "ascii" ))[1]
-#     for i in prev_blocks:
-#         if prev_blocks[i] == 0:
-#             print("block {} is the root".format(i))
-#         for j in block_hashes:
-#             if prev_blocks[i] == block_hashes[j]:
-#                 print("block {} is preceeded by {}".format(i, j))
-
-
 class Block():
     def __init__(self, name):
-        print("Building block {}".format(name))
         self.name = name
         with open(name, 'rb') as f:
             f_bytes = f.read()
@@ -126,7 +105,6 @@ class Block():
 
 class Transaction():
     def __init__(self, f_name=None, data=None):
-        print("Initializing transaction with filename {} or data {}".format(f_name, data))
         self.f_name = f_name
         self.data = data
         if f_name is not None:
@@ -141,7 +119,6 @@ class Transaction():
         self.verified = self.txn_signature_verified()
         self.inflows = []
         for i in self.txn[1][1]:
-            print("Building inflows")
             self.inflows.append(InFlow(self.get_public_key(), *i))
         self.outflows = []
         for i in self.txn[1][2]:
@@ -155,16 +132,18 @@ class Transaction():
         public_key = bytes.fromhex(self.txn[1][0])
         return verify(signature, bytes.fromhex(self.txn_hash), public_key)
 
-    def dump(self):
+    def verify(self):
         print("\n\n======= Transaction {} dump =======".format(self.f_name))
         if self.txn_signature_verified():
             print("Signature verified successfully!")
         else:
             print("****SIGNATURE FAILED TO VERIFY****")
+            return False
         total_money = 0
         for i in range(len(self.inflows)):
             if self.inflows[i].money == -1:
                 print("***AN INFLOW TRANSACTION COULD NOT BE FOUND****")
+                return False
                 break
             print("Inflow {} Transaction: Money: {}".format(i, self.inflows[i].money))
             total_money += self.inflows[i].money
@@ -176,13 +155,13 @@ class Transaction():
         print("Total money out: {}".format(total_out))
         if total_money != total_out:
             print("****MONEY AMOUNT DOES NOT MATCH****")
+            return False
 
 class InFlow():
     def __init__(self, recipient, block_id, txn_id):
         self.txn = None
         if block_id is None or txn_id is None:
             self.txn = None
-            #return None
         print("searching for block {}".format(block_id))
         self.money = 0
         for i in BLOCKS:
@@ -214,4 +193,17 @@ if __name__ == "__main__":
     transactions = [Transaction(f_name=name) for name in transaction_names]
     for i in transactions:
         i.dump()
+
+
+chain = BLOCKS
+
+# TODO
+
+def add_to_chain(block):
+    # do verification, add to our list
+
+def mine(*txns):
+    """return a block"""
+    # pack this list of transactions into a block, verify them, and mine the block
+
 
