@@ -20,9 +20,8 @@ class ServerClient(threading.Thread):
             for c in clients:
                 c.client.send(data)
         self.client.close()
-        lock.acquire()
-        clients.remove(self)
-        lock.release()
+        with lock:
+            clients.remove(self)
 
 while True: # wait for socket to connect
     # send socket to chatserver and start monitoring
