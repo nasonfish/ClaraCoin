@@ -23,8 +23,7 @@ class ServerClient(threading.Thread):
         with lock:
             clients.remove(self)
 
-while True: # wait for socket to connect
-    # send socket to chatserver and start monitoring
+while True:
     s = socket.socket()
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(('0.0.0.0',1264))
