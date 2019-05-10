@@ -2,15 +2,6 @@
 
 """
 
-Pietro, Sunny, Daniel
-
-Our results are as follows:
-
-(TL;DR: transactions 1 and 2 are good. Transaction 3 has an invalid signature.
-Transaction 4 is referencing an inflow transaction that doesn't exist.
-Transaction 5 is trying to spend more money than it has).
-
-
 ======= Transaction txn1 dump =======
 Signature verified successfully!
 Inflow 0 Transaction: Money: 10
