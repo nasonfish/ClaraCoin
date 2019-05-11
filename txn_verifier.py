@@ -1,5 +1,54 @@
 #!/usr/bin/env python3
 
+"""
+
+======= Transaction txn1 dump =======
+Signature verified successfully!
+Inflow 0 Transaction: Money: 10
+Total money in: 10
+Outflow 0 Transaction: Money 5
+Outflow 1 Transaction: Money 5
+Total money out: 10
+
+
+======= Transaction txn2 dump =======
+Signature verified successfully!
+Inflow 0 Transaction: Money: 10500
+Total money in: 10500
+Outflow 0 Transaction: Money 10000
+Outflow 1 Transaction: Money 500
+Total money out: 10500
+
+
+======= Transaction txn3 dump =======
+****SIGNATURE FAILED TO VERIFY****
+Inflow 0 Transaction: Money: 6000
+Total money in: 6000
+Outflow 0 Transaction: Money 5000
+Outflow 1 Transaction: Money 1000
+Total money out: 6000
+
+
+======= Transaction txn4 dump =======
+Signature verified successfully!
+Inflow 0 Transaction: Money: 5000
+***AN INFLOW TRANSACTION COULD NOT BE FOUND****
+Total money in: 5000
+Outflow 0 Transaction: Money 6000
+Total money out: 6000
+****MONEY AMOUNT DOES NOT MATCH****
+
+
+======= Transaction txn5 dump =======
+Signature verified successfully!
+Inflow 0 Transaction: Money: 5000
+Inflow 1 Transaction: Money: 10
+Total money in: 5010
+Outflow 0 Transaction: Money 6000
+Total money out: 6000
+****MONEY AMOUNT DOES NOT MATCH****
+
+"""
 
 import json
 
@@ -36,8 +85,6 @@ class Block():
             self.transactions = []
             for i in self.raw[2]:
                 self.transactions.append(Transaction(data=i))
-            self.merkleroot = merkle([ txn.txn_hash for txn in self.transactions ])
-
     def set_prev(self, blocks):
         if self.prev_hash == 0:
             self.prev = None
@@ -46,26 +93,20 @@ class Block():
             if i.hash == self.prev_hash:
                 self.prev = i
                 return
-    def check_double_spending(self, publicKey, blockId, transIdx):
-        #Russell Needs to
-        return
 
+    # TODO Finsih this method
+    def check_double_spending(self, public_key, block_id, txn_id):
+        #Go through each txn in block
+        for txn in self.transactions:
+            #check to see if input public key matches
+            if (txn.get_public_key() == public_key):
+                # Check every inflow of in public key matches
+                for inflow in txn.inflows:
+                    #If block id and txn id match, then the block double spends
+                    if(block_id == inflow.get_blockId() and txn_id == inflow.get_txnId()):
+                        return False
+        return True
 
-    def merkle( hashlist ):
-        if len(hashlist) == 0:
-            return 0
-        elif len(hashlist) == 1:
-            return hashlist[0]
-        else:
-            new_hashlist = []
-            for i in range(0, len(hashlist)-1, 2):
-                new_hashlist.append( sha256( hashlist[i] + hashlist[i+1] ) )
-            if len( hashlist ) % 2 == 1:
-                hashlist.append( sha256( hashlist[-1] + hashlist[-1] ) )
-            return merkle( hashlist )
-
-    def prune(self):
-        pass
 
 class Transaction():
     def __init__(self, f_name=None, data=None):
@@ -78,6 +119,7 @@ class Transaction():
             with open(f_name, 'rb') as f:
                 f_bytes = f.read()
                 self.txn = json.loads(f_bytes.decode( "ascii" ))
+                printTxn(self.txn)
         elif data is not None:
             self.txn = data
         else:
@@ -98,6 +140,9 @@ class Transaction():
             self.outflows.append(OutFlow(*i))
 
     def get_public_key(self):
+        #Changed this from 1 to [0]
+        # print(self.signature)
+        # print("get public key ", self.txn[1][0])
         return self.txn[1][0]
 
     def txn_signature_verified(self):
@@ -105,11 +150,16 @@ class Transaction():
         public_key = bytes.fromhex(self.txn[1][0])
         return verify(signature, bytes.fromhex(self.txn_hash), public_key)
 
-    def check_double_spending(self, inFlows):
+    def check_double_spending(self,public_key, inFlows):
+        #print("pubKey", str(inFlows.txn.get_public_key()), "blockid",str(inFlows.get_blockId()), "txnID", str(inFlows.get_txnId()))
         for i in BLOCKS:
             #Check for every block
             #Check for every block id in transaction
-            i.check_double_spending(inFlows.txn.get_public_key(), inFlows.get_blockId(), inFlows.get_txnId())
+            if not(i.check_double_spending(public_key, inFlows.get_blockId(), inFlows.get_txnId())):
+                print("FALSE")
+                return False
+        return True
+
 
     def verify(self):
         print("\n\n======= Transaction {} dump =======".format(self.f_name))
@@ -129,7 +179,8 @@ class Transaction():
             total_money += self.inflows[i].money
 
             # Check for Double Spending
-            self.check_double_spending(self.inflows[i])
+            if not (self.check_double_spending(self.get_public_key(),self.inflows[i])):
+                print("*** THIS TRANSACTION HAS DOUBLE SPENDING ***")
 
         print("Total money in: {}".format(total_money))
         total_out = 0
@@ -144,8 +195,8 @@ class Transaction():
 
 class InFlow():
     def __init__(self, recipient, block_id, txn_id):
-        print("BLOCK ID ", block_id)
-        print("txn ID", txn_id)
+        # print("BLOCK ID ", block_id)
+        # print("txn ID", txn_id)
         self.block_id = block_id
         self.txn_id = txn_id
         self.txn = None
@@ -174,40 +225,45 @@ class OutFlow():
         self.money = coins
         self.recipient = recipient
 
-
-if __name__ == '__main__':
-    """TESTS / Our homework assignment."""
-    BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
-    # These are in order, but frankly do not need to be. code for ordering is commented up above
-    for name in BLOCK_FILES:
-       BLOCKS.append(Block(name))
-    for block in BLOCKS:
-        block.set_prev(BLOCKS)
-
-    if __name__ == "__main__":
-        transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
-        transactions = [Transaction(f_name=name) for name in transaction_names]
-        for i in transactions:
-            #print(i)
-            i.verify()
+def printTxn( signed_txn ):
+	print( "  Signature: %s" % signed_txn[ 0 ] )
+	txn = signed_txn[ 1 ]
+	print( "  Public key: %s" % txn[ 0 ] )
+	print( "  In-flows:" )
+	for flow in txn[ 1 ]:
+		print( "	Block ID: %s" % flow[ 0 ] )
+		print( "	Txn idx: %d" % flow[ 1 ] )
+	print( "  Out-flows:" )
+	for flow in txn[ 2 ]:
+		print( "	Coins: %d" % flow[ 0 ] )
+		print( "	Recipient public key: %s" % flow[ 1 ] )
 
 
-class BlockChain:
-    def __init__(self, blocks):
-        self.blocks = blocks
-    def add_block(self, block):
-        # DO ALL THE BLOCK VALIDATION AND REJECT IF UNACCEPTABLE
-        self.blocks.append(block)
-    def get_tail(self):
-        return self.blocks[-1]
+BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
+# These are in order, but frankly do not need to be. code for ordering is commented up above
+for name in BLOCK_FILES:
+   BLOCKS.append(Block(name))
+for block in BLOCKS:
+    block.set_prev(BLOCKS)
 
-class BlockProposal:
-    def __init__(self, prev_block, transactions):
-        self.transactions = transactions
-        self.prev_block = prev_block
-    def serialize(self):
-        return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
-    def mine(self):
-        self.magic_num = os.urandom(32).hex()
-        hsh = sha256(self.serialize())
-        return int(hsh, 16) & 0xFFFF == 0x0
+if __name__ == "__main__":
+    #
+    transaction_names = ['Transactions/txn2','Transactions/txn4', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn5']
+    transactions = [Transaction(f_name=name) for name in transaction_names]
+    for i in transactions:
+        pass
+        #print(i)
+        i.verify()
+
+
+chain = BLOCKS
+
+# TODO
+
+def add_to_chain(block):
+    return
+    # do verification, add to our list
+
+def mine(*txns):
+    """return a block"""
+    # pack this list of transactions into a block, verify them, and mine the block
