@@ -85,12 +85,12 @@ class Block():
             self.transactions = []
             for i in self.raw[2]:
                 self.transactions.append(Transaction(data=i))
-<<<<<<< HEAD
-=======
+#<<<<<<< HEAD
+#=======
             self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
             # print("merkleroot: ", self.merkleroot)
 
->>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
+
     def set_prev(self, blocks):
         if self.prev_hash == 0:
             self.prev = None
@@ -113,8 +113,6 @@ class Block():
                         return False
         return True
 
-<<<<<<< HEAD
-=======
     def merkle( self, hashlist ):
 
         if len(hashlist) == 0:
@@ -131,7 +129,7 @@ class Block():
 
     def prune(self):
         pass
->>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
+
 
 class Transaction():
     def __init__(self, f_name=None, data=None):
@@ -289,11 +287,10 @@ def add_to_chain(block):
     return
     # do verification, add to our list
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
 def mine(*txns):
     """return a block"""
     # pack this list of transactions into a block, verify them, and mine the block
-=======
 if __name__ == '__main__':
     """TESTS / Our homework assignment."""
     BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
@@ -331,4 +328,4 @@ class BlockProposal:
         self.magic_num = os.urandom(32).hex()
         hsh = sha256(self.serialize())
         return int(hsh, 16) & 0xFFFF == 0x0
->>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
+#>>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
