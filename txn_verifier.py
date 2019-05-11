@@ -1,54 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-
-======= Transaction txn1 dump =======
-Signature verified successfully!
-Inflow 0 Transaction: Money: 10
-Total money in: 10
-Outflow 0 Transaction: Money 5
-Outflow 1 Transaction: Money 5
-Total money out: 10
-
-
-======= Transaction txn2 dump =======
-Signature verified successfully!
-Inflow 0 Transaction: Money: 10500
-Total money in: 10500
-Outflow 0 Transaction: Money 10000
-Outflow 1 Transaction: Money 500
-Total money out: 10500
-
-
-======= Transaction txn3 dump =======
-****SIGNATURE FAILED TO VERIFY****
-Inflow 0 Transaction: Money: 6000
-Total money in: 6000
-Outflow 0 Transaction: Money 5000
-Outflow 1 Transaction: Money 1000
-Total money out: 6000
-
-
-======= Transaction txn4 dump =======
-Signature verified successfully!
-Inflow 0 Transaction: Money: 5000
-***AN INFLOW TRANSACTION COULD NOT BE FOUND****
-Total money in: 5000
-Outflow 0 Transaction: Money 6000
-Total money out: 6000
-****MONEY AMOUNT DOES NOT MATCH****
-
-
-======= Transaction txn5 dump =======
-Signature verified successfully!
-Inflow 0 Transaction: Money: 5000
-Inflow 1 Transaction: Money: 10
-Total money in: 5010
-Outflow 0 Transaction: Money 6000
-Total money out: 6000
-****MONEY AMOUNT DOES NOT MATCH****
-
-"""
 
 import json
 
@@ -85,6 +36,8 @@ class Block():
             self.transactions = []
             for i in self.raw[2]:
                 self.transactions.append(Transaction(data=i))
+            self.merkleroot = merkle([ txn.txn_hash for txn in self.transactions ])
+
     def set_prev(self, blocks):
         if self.prev_hash == 0:
             self.prev = None
@@ -93,6 +46,22 @@ class Block():
             if i.hash == self.prev_hash:
                 self.prev = i
                 return
+
+    def merkle( hashlist ):
+        if len(hashlist) == 0:
+            return 0
+        elif len(hashlist) == 1:
+            return hashlist[0]
+        else:
+            new_hashlist = []
+            for i in range(0, len(hashlist)-1, 2):
+                new_hashlist.append( sha256( hashlist[i] + hashlist[i+1] ) )
+            if len( hashlist ) % 2 == 1:
+                hashlist.append( sha256( hashlist[-1] + hashlist[-1] ) )
+            return merkle( hashlist )
+
+    def prune(self):
+        pass
 
 class Transaction():
     def __init__(self, f_name=None, data=None):
@@ -196,5 +165,3 @@ def add_to_chain(block):
 def mine(*txns):
     """return a block"""
     # pack this list of transactions into a block, verify them, and mine the block
-
-
