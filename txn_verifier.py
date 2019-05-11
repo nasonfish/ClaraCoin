@@ -85,6 +85,12 @@ class Block():
             self.transactions = []
             for i in self.raw[2]:
                 self.transactions.append(Transaction(data=i))
+<<<<<<< HEAD
+=======
+            self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
+            # print("merkleroot: ", self.merkleroot)
+
+>>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
     def set_prev(self, blocks):
         if self.prev_hash == 0:
             self.prev = None
@@ -107,6 +113,25 @@ class Block():
                         return False
         return True
 
+<<<<<<< HEAD
+=======
+    def merkle( self, hashlist ):
+
+        if len(hashlist) == 0:
+            return 0
+        elif len(hashlist) == 1:
+            return hashlist[0]
+        else:
+            new_hashlist = []
+            for i in range(0, len(hashlist)-1, 2):
+                new_hashlist.append( sha256( bytes.fromhex( hashlist[i]) + bytes.fromhex( hashlist[i+1] ) ) )
+            if len( hashlist ) % 2 == 1:
+                hashlist.append( sha256( hashlist[-1] + hashlist[-1] ) )
+            return self.merkle( new_hashlist )
+
+    def prune(self):
+        pass
+>>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
 
 class Transaction():
     def __init__(self, f_name=None, data=None):
@@ -264,6 +289,46 @@ def add_to_chain(block):
     return
     # do verification, add to our list
 
+<<<<<<< HEAD
 def mine(*txns):
     """return a block"""
     # pack this list of transactions into a block, verify them, and mine the block
+=======
+if __name__ == '__main__':
+    """TESTS / Our homework assignment."""
+    BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
+    # These are in order, but frankly do not need to be. code for ordering is commented up above
+    for name in BLOCK_FILES:
+       BLOCKS.append(Block(name))
+    for block in BLOCKS:
+        block.set_prev(BLOCKS)
+
+
+    # if __name__ == "__main__":
+    #    transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
+    #    transactions = [Transaction(f_name=name) for name in transaction_names]
+    #    for i in transactions:
+            #print(i)
+    #        i.verify()
+
+
+class BlockChain:
+    def __init__(self, blocks):
+        self.blocks = blocks
+    def add_block(self, block):
+        # DO ALL THE BLOCK VALIDATION AND REJECT IF UNACCEPTABLE
+        self.blocks.append(block)
+    def get_tail(self):
+        return self.blocks[-1]
+
+class BlockProposal:
+    def __init__(self, prev_block, transactions):
+        self.transactions = transactions
+        self.prev_block = prev_block
+    def serialize(self):
+        return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
+    def mine(self):
+        self.magic_num = os.urandom(32).hex()
+        hsh = sha256(self.serialize())
+        return int(hsh, 16) & 0xFFFF == 0x0
+>>>>>>> 31d269ef845ff5c52c374d4a6ed743dc8316c8fd
