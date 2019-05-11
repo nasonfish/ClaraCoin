@@ -15,6 +15,7 @@ class ServerClient(threading.Thread):
             clients.append(self)
         while True:
             data = self.client.recv(1024)
+            print("recieved: {}".format(data))
             if not data:
                 break
             for c in clients:

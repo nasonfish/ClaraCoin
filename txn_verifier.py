@@ -142,10 +142,6 @@ class Transaction():
             #Check for every block id in transaction
             i.check_double_spending(inFlows.txn.get_public_key(), inFlows.get_blockId(), inFlows.get_txnId())
 
-
-
-
-
     def verify(self):
         print("\n\n======= Transaction {} dump =======".format(self.f_name))
         if self.txn_signature_verified():
@@ -168,9 +164,6 @@ class Transaction():
 
         print("Total money in: {}".format(total_money))
         total_out = 0
-
-
-
 
         for i in range(len(self.outflows)):
             print("Outflow {} Transaction: Money {}".format(i, self.outflows[i].money))
@@ -212,29 +205,41 @@ class OutFlow():
         self.money = coins
         self.recipient = recipient
 
-BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
-# These are in order, but frankly do not need to be. code for ordering is commented up above
-for name in BLOCK_FILES:
-   BLOCKS.append(Block(name))
-for block in BLOCKS:
-    block.set_prev(BLOCKS)
 
-if __name__ == "__main__":
-    transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
-    transactions = [Transaction(f_name=name) for name in transaction_names]
-    for i in transactions:
-        #print(i)
-        i.verify()
+if __name__ == '__main__':
+    """TESTS / Our homework assignment."""
+    BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
+    # These are in order, but frankly do not need to be. code for ordering is commented up above
+    for name in BLOCK_FILES:
+       BLOCKS.append(Block(name))
+    for block in BLOCKS:
+        block.set_prev(BLOCKS)
+
+    if __name__ == "__main__":
+        transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
+        transactions = [Transaction(f_name=name) for name in transaction_names]
+        for i in transactions:
+            #print(i)
+            i.verify()
 
 
-chain = BLOCKS
+class BlockChain:
+    def __init__(self, blocks):
+        self.blocks = blocks
+    def add_block(self, block):
+        # DO ALL THE BLOCK VALIDATION AND REJECT IF UNACCEPTABLE
+        self.blocks.append(block)
+    def get_tail(self):
+        return self.blocks[-1]
 
-# TODO
+class BlockProposal:
+    def __init__(self, prev_block, transactions):
+        self.transactions = transactions
+        self.prev_block = prev_block
+    def serialize(self):
+        return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
+    def mine(self):
+        self.magic_num = os.urandom(32).hex()
+        hsh = sha256(self.serialize())
+        return int(hsh, 16) & 0xFFFF == 0x0
 
-def add_to_chain(block):
-    return
-    # do verification, add to our list
-
-def mine(*txns):
-    """return a block"""
-    # pack this list of transactions into a block, verify them, and mine the block
