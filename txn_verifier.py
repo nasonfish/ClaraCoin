@@ -46,6 +46,10 @@ class Block():
             if i.hash == self.prev_hash:
                 self.prev = i
                 return
+    def check_double_spending(self, publicKey, blockId, transIdx):
+        #Russell Needs to
+        return
+
 
     def merkle( hashlist ):
         if len(hashlist) == 0:
@@ -65,6 +69,9 @@ class Block():
 
 class Transaction():
     def __init__(self, f_name=None, data=None):
+        # print("F Name " + str(f_name))
+        # print(data)
+        # self.
         self.f_name = f_name
         self.data = data
         if f_name is not None:
@@ -75,12 +82,18 @@ class Transaction():
             self.txn = data
         else:
             raise Exception("bad")
+
+
         self.txn_hash = sha256(json.dumps(self.txn[1]).encode("ascii"))
         self.verified = self.txn_signature_verified()
         self.inflows = []
+        #Get the inflows
+
         for i in self.txn[1][1]:
             self.inflows.append(InFlow(self.get_public_key(), *i))
         self.outflows = []
+
+        #Get the Outflows
         for i in self.txn[1][2]:
             self.outflows.append(OutFlow(*i))
 
@@ -92,6 +105,12 @@ class Transaction():
         public_key = bytes.fromhex(self.txn[1][0])
         return verify(signature, bytes.fromhex(self.txn_hash), public_key)
 
+    def check_double_spending(self, inFlows):
+        for i in BLOCKS:
+            #Check for every block
+            #Check for every block id in transaction
+            i.check_double_spending(inFlows.txn.get_public_key(), inFlows.get_blockId(), inFlows.get_txnId())
+
     def verify(self):
         print("\n\n======= Transaction {} dump =======".format(self.f_name))
         if self.txn_signature_verified():
@@ -100,6 +119,7 @@ class Transaction():
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
         total_money = 0
+
         for i in range(len(self.inflows)):
             if self.inflows[i].money == -1:
                 print("***AN INFLOW TRANSACTION COULD NOT BE FOUND****")
@@ -107,8 +127,13 @@ class Transaction():
                 break
             print("Inflow {} Transaction: Money: {}".format(i, self.inflows[i].money))
             total_money += self.inflows[i].money
+
+            # Check for Double Spending
+            self.check_double_spending(self.inflows[i])
+
         print("Total money in: {}".format(total_money))
         total_out = 0
+
         for i in range(len(self.outflows)):
             print("Outflow {} Transaction: Money {}".format(i, self.outflows[i].money))
             total_out += self.outflows[i].money
@@ -119,10 +144,14 @@ class Transaction():
 
 class InFlow():
     def __init__(self, recipient, block_id, txn_id):
+        print("BLOCK ID ", block_id)
+        print("txn ID", txn_id)
+        self.block_id = block_id
+        self.txn_id = txn_id
         self.txn = None
         if block_id is None or txn_id is None:
             self.txn = None
-        print("searching for block {}".format(block_id))
+        # print("searching for block {}".format(block_id))
         self.money = 0
         for i in BLOCKS:
             if i.hash == block_id:
@@ -135,33 +164,50 @@ class InFlow():
             self.money = -1
         if self.txn is None:
             raise Exception("no previous block/transaction found for block {} transaction {}".format(block_id, txn_id))
+    def get_blockId(self):
+        return self.block_id
+    def get_txnId(self):
+        return self.txn_id
 
 class OutFlow():
     def __init__(self, coins, recipient):
         self.money = coins
         self.recipient = recipient
 
-BLOCK_FILES = ['block0', 'block2398', 'block1530', 'block3312', 'block7123']
-# These are in order, but frankly do not need to be. code for ordering is commented up above
-for name in BLOCK_FILES:
-   BLOCKS.append(Block(name))
-for block in BLOCKS:
-    block.set_prev(BLOCKS)
 
-if __name__ == "__main__":
-    transaction_names = ['txn1', 'txn2', 'txn3', 'txn4', 'txn5']
-    transactions = [Transaction(f_name=name) for name in transaction_names]
-    for i in transactions:
-        i.dump()
+if __name__ == '__main__':
+    """TESTS / Our homework assignment."""
+    BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
+    # These are in order, but frankly do not need to be. code for ordering is commented up above
+    for name in BLOCK_FILES:
+       BLOCKS.append(Block(name))
+    for block in BLOCKS:
+        block.set_prev(BLOCKS)
+
+    if __name__ == "__main__":
+        transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
+        transactions = [Transaction(f_name=name) for name in transaction_names]
+        for i in transactions:
+            #print(i)
+            i.verify()
 
 
-chain = BLOCKS
+class BlockChain:
+    def __init__(self, blocks):
+        self.blocks = blocks
+    def add_block(self, block):
+        # DO ALL THE BLOCK VALIDATION AND REJECT IF UNACCEPTABLE
+        self.blocks.append(block)
+    def get_tail(self):
+        return self.blocks[-1]
 
-# TODO
-
-def add_to_chain(block):
-    # do verification, add to our list
-
-def mine(*txns):
-    """return a block"""
-    # pack this list of transactions into a block, verify them, and mine the block
+class BlockProposal:
+    def __init__(self, prev_block, transactions):
+        self.transactions = transactions
+        self.prev_block = prev_block
+    def serialize(self):
+        return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
+    def mine(self):
+        self.magic_num = os.urandom(32).hex()
+        hsh = sha256(self.serialize())
+        return int(hsh, 16) & 0xFFFF == 0x0
