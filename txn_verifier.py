@@ -36,7 +36,8 @@ class Block():
             self.transactions = []
             for i in self.raw[2]:
                 self.transactions.append(Transaction(data=i))
-            self.merkleroot = merkle([ txn.txn_hash for txn in self.transactions ])
+            self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
+            # print("merkleroot: ", self.merkleroot)
 
     def set_prev(self, blocks):
         if self.prev_hash == 0:
@@ -51,7 +52,8 @@ class Block():
         return
 
 
-    def merkle( hashlist ):
+    def merkle( self, hashlist ):
+
         if len(hashlist) == 0:
             return 0
         elif len(hashlist) == 1:
@@ -59,10 +61,10 @@ class Block():
         else:
             new_hashlist = []
             for i in range(0, len(hashlist)-1, 2):
-                new_hashlist.append( sha256( hashlist[i] + hashlist[i+1] ) )
+                new_hashlist.append( sha256( bytes.fromhex( hashlist[i]) + bytes.fromhex( hashlist[i+1] ) ) )
             if len( hashlist ) % 2 == 1:
                 hashlist.append( sha256( hashlist[-1] + hashlist[-1] ) )
-            return merkle( hashlist )
+            return self.merkle( new_hashlist )
 
     def prune(self):
         pass
@@ -184,12 +186,13 @@ if __name__ == '__main__':
     for block in BLOCKS:
         block.set_prev(BLOCKS)
 
-    if __name__ == "__main__":
-        transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
-        transactions = [Transaction(f_name=name) for name in transaction_names]
-        for i in transactions:
+
+    # if __name__ == "__main__":
+    #    transaction_names = ['Transactions/txn2', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn4', 'Transactions/txn5']
+    #    transactions = [Transaction(f_name=name) for name in transaction_names]
+    #    for i in transactions:
             #print(i)
-            i.verify()
+    #        i.verify()
 
 
 class BlockChain:
