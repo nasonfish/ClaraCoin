@@ -258,7 +258,7 @@ def printTxn( signed_txn ):
 		print( "	Recipient public key: %s" % flow[ 1 ] )
 
 
-BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
+BLOCK_FILES = ['Blocks/block0', 'Blocks/block2398', 'Blocks/block1530', 'Blocks/block3312', 'Blocks/block7123']
 # These are in order, but frankly do not need to be. code for ordering is commented up above
 for name in BLOCK_FILES:
    BLOCKS.append(Block(name))
@@ -283,7 +283,6 @@ def add_to_chain(block):
     return
     # do verification, add to our list
 
-# <<<<<<< HEAD
 def mine(*txns):
     """return a block"""
     # pack this list of transactions into a block, verify them, and mine the block
