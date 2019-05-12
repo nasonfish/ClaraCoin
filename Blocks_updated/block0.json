@@ -1,0 +1,23 @@
+{
+	"hash": "",
+  "prev_block": 0,
+  "magic_num": 0,
+	"merkleroot": "",
+  "block_idx": 0,
+	"transactions": [
+    {
+    	"hash": "",
+    	"signature": "",
+    	"body": {
+				"public_key": "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743",
+    		"inflows": [],
+    		"outflows": [
+	    		{
+	    			"recipient": "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743",
+	    			"number_of_coins": 10000
+	    		}
+				]
+			}
+		}
+	]
+}
