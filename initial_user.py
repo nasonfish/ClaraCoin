@@ -41,7 +41,7 @@ def main():
 
         pprint.pprint(block)
 
-        block_obj = Block( 0, [ txn ], 0  )
+        block_obj = Block( 0, [ txn ], 0 )
         block["merkleroot"] = block_obj.merkleroot
 
         success = False

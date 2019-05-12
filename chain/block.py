@@ -4,7 +4,7 @@ from transaction import Transaction
 
 
 class Block():
-    def __init__(self, prev_hash, magic_num=None, transactions, block_idx ):
+    def __init__(self, prev_hash, transactions, block_idx, magic_num=None):
         self.prev_hash = prev_hash
         self.magic_num = magic_num
         self.transactions = transactions
@@ -71,7 +71,7 @@ class Block():
             return self.merkle( new_hashlist )
 
     def prune(self):
-        for i in range(len(self.transactions):
+        for i in range(len(self.transactions)):
             if self.transactions[i].is_spent():
                 self.transactions[i] = None
 
