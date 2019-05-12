@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 import json
 import pprint
 from util import sha256
-from transaction import Transaction
+from chain import Transaction
 
 
 def main():
@@ -27,7 +27,8 @@ def main():
     with open("Blocks_updated/block0.json", 'r') as f:
         block = json.loads( f.read() )
         pprint.pprint(block)
-        txn = Transaction.load( block["transactions"][0] )
+        txn = Transaction.load( json.dumps( block["transactions"][0] ) )
+        pprint.pprint(txn)
 
         # txn = block["transactions"][0]["data"]
         # signature = private_key.sign( json.dumps( txn["body"] ).encode("ascii") )
