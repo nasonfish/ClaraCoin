@@ -158,7 +158,7 @@ class BlockChain:
         return self.blocks[-1]
 
     def verify(self):
-        for i in range( len(blocks)-1 ):
+        for i in range( len(self.blocks)-1 ):
             # Verify transactions of a block
             if i > 0:
                 for txn in self.blocks[i+1].transactions:
