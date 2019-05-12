@@ -28,6 +28,6 @@ def main():
         signature = private_key.sign( json.dumps( txn["body"] ).encode("ascii") )
         # public_key.verify(signature, json.dumps( txn["body"] ).encode("ascii") )
         block['transactions'][0]['signature'] = signature.hex()
-        
+
 if __name__ == '__main__':
     main()
