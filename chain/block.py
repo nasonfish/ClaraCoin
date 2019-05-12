@@ -1,6 +1,6 @@
 import json
 from util import sha256
-from transaction import Transaction
+from chain import Transaction
 
 
 class Block():
@@ -9,7 +9,7 @@ class Block():
         self.magic_num = magic_num
         self.transactions = transactions
         self.block_idx = block_idx
-        self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
+        self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
     def set_magic_num(self, magic_num):
         self.magic_num = magic_num
