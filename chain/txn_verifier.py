@@ -160,14 +160,15 @@ class BlockChain:
     def verify(self):
         for i in range( len(blocks)-1 ):
             # Verify transactions of a block
-            try:
-                self.blocks[i+1].verify()
-            except Exception:
-                print("Block at position %d failed to verify" % (i+1))
+            if i > 0:
+                for txn in self.blocks[i+1].transactions:
+                    if not txn.verify():
+                        return False
             # Check proof of work
             block_id = self.blocks[i].get_hash()
             if block_id != self.blocks[i+1].prev_hash:
-                raise Exception("Previous block id in block at position %d does not match the actual id of previous block" % (i+1))
+                return False
+        return True
 
     def serialize(self):
         return json.dumps(self.blocks)
