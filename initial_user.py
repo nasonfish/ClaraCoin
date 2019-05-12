@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 import json
 import pprint
+from util import sha256
 
 def main():
     private_key = ed25519.Ed25519PrivateKey.generate()
@@ -24,10 +25,19 @@ def main():
     with open("Blocks_updated/block0.json", 'r') as f:
         block = json.loads( f.read() )
         pprint.pprint(block)
-        txn = block['transactions'][0]
-        signature = private_key.sign( json.dumps( txn["body"] ).encode("ascii") )
+        txn = Transaction.load( block["transactions"][0] )
+
+        # txn = block["transactions"][0]["data"]
+        # signature = private_key.sign( json.dumps( txn["body"] ).encode("ascii") )
         # public_key.verify(signature, json.dumps( txn["body"] ).encode("ascii") )
-        block['transactions'][0]['signature'] = signature.hex()
+        # block['transactions'][0]["data"]["signature"] = signature.hex()
+        # block['transactions'][0]["hash"] = sha256( json.dumps( block['transactions'][0]["data"] ).encode("ascii") )
+
+        block['transactions'][0]["data"]["signature"] = txn.signature
+        block['transactions'][0]["data"]["hash"] = txn.get_hash()
+
+
+        Block(  )
 
 if __name__ == '__main__':
     main()
