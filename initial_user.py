@@ -3,6 +3,8 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 import json
 import pprint
 from util import sha256
+from transaction import Transaction
+
 
 def main():
     private_key = ed25519.Ed25519PrivateKey.generate()
@@ -36,8 +38,24 @@ def main():
         block['transactions'][0]["data"]["signature"] = txn.signature
         block['transactions'][0]["data"]["hash"] = txn.get_hash()
 
+        pprint.pprint(block)
 
-        Block(  )
+        block_obj = Block( 0, [ txn ], 0  )
+        block["merkleroot"] = block_obj.merkleroot
+
+        success = False
+        while not success:
+            magic_num = os.urandom(32).hex()
+            block_obj.set_magic_num( magic_num )
+            if int(block_obj.get_hash(), 8) & 0xFF == 0x0:
+                success = True
+
+
+        block["hash"] = block_obj.get_hash()
+        block["magic_num"] = block_obj.magic_num
+
+        pprint.pprint(block)
+
 
 if __name__ == '__main__':
     main()

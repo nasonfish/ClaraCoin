@@ -1,3 +1,5 @@
+import json
+from util import sha256
 
 class Transaction():
     def __init__(self, public_key, inflows, outflows, data=None):

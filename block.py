@@ -1,13 +1,18 @@
+import json
+from util import sha256
+from transaction import Transaction
+
 
 class Block():
-    def __init__(self, name=None, prev_hash, magic_num, transactions, block_height):
+    def __init__(self, prev_hash, magic_num=None, transactions, block_idx ):
         self.prev_hash = prev_hash
         self.magic_num = magic_num
         self.transactions = transactions
-        self.block_height = block_height
+        self.block_idx = block_idx
         self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
-        self.hash = self.hash()
 
+    def set_magic_num(self, magic_num):
+        self.magic_num = magic_num
 
     @classmethod
     def load(self, filename):
@@ -49,7 +54,7 @@ class Block():
     def serialize(self):
         return json.dumps([self.hash, self.prev_block.hash, self.magic_num, self.block_height, self.merkleroot, [txn.serialize for txn in self.transactions]])
 
-    def hash(self):
+    def get_hash(self):
         return sha256( bytes.fromhex(self.prev_hash) + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
 
     def merkle( self, hashlist ):

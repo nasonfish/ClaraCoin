@@ -168,10 +168,12 @@ class BlockProposal:
         return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
 
     def mine(self, prev_block, transactions):
+
         valid_transactions = []
         for txn in transactions:
             if txn.verify():
                 valid_transactions.append(txn)
+
         if len(valid_transactions) > 0:
             while True:
                 magic_num = os.urandom(32).hex()
@@ -190,4 +192,3 @@ class BlockChainRequest:
 
 class Confirmation:
     pass
-
