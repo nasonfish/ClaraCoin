@@ -1,15 +1,15 @@
 import json
 from util import sha256
-from transaction import Transaction
+from chain import Transaction
 
 
 class Block():
-    def __init__(self, prev_hash, magic_num=None, transactions, block_idx ):
+    def __init__(self, prev_hash, transactions, block_idx, magic_num=None):
         self.prev_hash = prev_hash
         self.magic_num = magic_num
         self.transactions = transactions
         self.block_idx = block_idx
-        self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
+        self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
     def set_magic_num(self, magic_num):
         self.magic_num = magic_num
@@ -71,7 +71,7 @@ class Block():
             return self.merkle( new_hashlist )
 
     def prune(self):
-        for i in range(len(self.transactions):
+        for i in range(len(self.transactions)):
             if self.transactions[i].is_spent():
                 self.transactions[i] = None
 
