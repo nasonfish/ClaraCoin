@@ -6,9 +6,22 @@
 	"prev_block": 0,
 	"transactions": [
 										{
-											"data": {"body": {"inflows": [],
-                                     "outflows": [{"number_of_coins": 10000,
-                                                   "recipient": "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743"}],
-                                     "public_key": "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743"},
-                            "signature": "ccbe8e592b9ff87c81c8560d5f52e718d220efcc2570bd391d8321ecef490538af93c9287e6809b7eccd77184cb4bb44b922b6f447f10c9df064401d0d282a08"},
-                   "hash": "133eb68d6ad7f9f4e98be42f0e03202800917bdd1ebf546b793b3b7c84791e07"}]}
+											"data":
+											{
+												"body":
+												{
+													"inflows": [],
+                        	"outflows": [
+																				{
+																					"number_of_coins": 10000,
+                                        	"recipient": "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743"
+																				}
+																			],
+                          "public_key": "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743"
+												},
+                        "signature": "ccbe8e592b9ff87c81c8560d5f52e718d220efcc2570bd391d8321ecef490538af93c9287e6809b7eccd77184cb4bb44b922b6f447f10c9df064401d0d282a08"
+											},
+                   		"hash": "133eb68d6ad7f9f4e98be42f0e03202800917bdd1ebf546b793b3b7c84791e07"
+										}
+									]
+}
