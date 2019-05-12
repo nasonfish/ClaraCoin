@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 import json
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
-
-BACKEND = default_backend()
+from util import sha256
 
 BLOCKS = [] # defined below. bad practice, I know, global variable
 
-def sha256(message):
-    digest = hashes.Hash(hashes.SHA256(), BACKEND)
-    digest.update(message)
-    return digest.finalize().hex()
 
 def verify(signature, data, public_key):
     try:
@@ -153,14 +146,28 @@ class BlockChain:
         self.blocks = blocks
 
     def add_block(self, block):
-        # DO ALL THE BLOCK VALIDATION AND REJECT IF UNACCEPTABLE
+        try:
+            block.verify()
+        except:
+            print("Block doesn't verify; do not add to chain")
+            return
+
         self.blocks.append(block)
 
     def get_tail(self):
         return self.blocks[-1]
 
     def verify(self):
-        pass  # CLARA TODO
+        for i in range( len(blocks)-1 ):
+            # Verify transactions of a block
+            try:
+                self.blocks[i+1].verify()
+            except Exception:
+                print("Block at position %d failed to verify" % (i+1))
+            # Check proof of work
+            block_id = self.blocks[i].get_hash()
+            if block_id != self.blocks[i+1].prev_hash:
+                raise Exception("Previous block id in block at position %d does not match the actual id of previous block" % (i+1))
 
     def serialize(self):
         return json.dumps(self.blocks)
