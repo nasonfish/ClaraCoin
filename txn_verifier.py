@@ -406,3 +406,12 @@ class BlockProposal:
                 if int(new_block.hash, 16) & 0xFFFF == 0x0:
                     return new_block
 
+class BlockChainRequest:
+
+    def serialize():
+        return ''
+
+    @classmethod
+    def load(data):
+        return BlockChainRequest()
+
