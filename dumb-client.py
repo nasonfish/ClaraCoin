@@ -3,7 +3,7 @@ import threading
 import json
 import time
 
-from txn_verifier import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
+from chain import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
 from mine_network import shout, recv
 
 TASK_NONE = 0
@@ -17,6 +17,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 blockchain = None
 
+transactions = []
+
 class MiningInturrupt(Exception):
     pass
 
@@ -26,32 +28,35 @@ def loop():
         time.sleep(5)
     while True:
         try:
-            next_block = mine_block(blockchain.get_tail()) # blocks until mining successful or state change
+            pack = tuple(transactions)
+            next_block = blockchain.add_block(mine_block(blockchain.propose(*pack))) # blocks until mining successful or state change
             print("block mined: {}".format(next_block.serialize()))
+            for i in pack:
+                transactions.remove(i)  # these have been included already :)
             sock.send(next_block.serialize().encode('ascii') + b'\n')
-            starting_block = next_block
         except MiningInturrupt:
             pass
-    
 
 def mine_block(block_proposal):
     while task is TASK_MINING:
-        if block_proposal.mine(): # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
-            return block_proposal
+        success = block_proposal.mine() # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
+        return block_proposal
     raise MiningInturrupt()
 
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
     obj = recv(line)
     if type(obj) is BlockChain:
-        global blockchain
-        if blockchain is not None:
-            return  # ignore
+        print("recieved a blockchain")
+        if not obj.verify():
+            print("bad blockchain")
+            return  # bad blockchain
+        print("good blockchain")
         blockchain = obj
     elif type(obj) is Block:
         pass
     elif type(obj) is Transaction:
-        pass
+        transactions.append(obj)
     elif type(obj) is Confirmation:
         pass
     elif type(obj) is BlockChainRequest:
@@ -96,7 +101,7 @@ def request_blockchain():
     shout(sock, BlockChainRequest())
 
 if __name__ == '__main__':
-    sock.connect(('0.0.0.0',1264))
+    sock.connect((HOST, PORT))
     
     Client(sock).start()
     request_blockchain()

@@ -1,6 +1,6 @@
-from txn_verifier import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
+from chain import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
 
-data_types = {b'\x01': BlockChain, b'\x02': Block, b'\x03': Transaction, b'\x04': Confirmation, b'\x05': BlockChainRequest}
+data_types = {b'1': BlockChain, b'\x02': Block, b'\x03': Transaction, b'\x04': Confirmation, b'\x05': BlockChainRequest}
 
 def send_format(data):
     """Transform an object in data_types into its corresponding JSON serialization 
@@ -25,6 +25,10 @@ def shout(sock, data):
 def recv(data):
     """Given data we have received over the wire, transform it back into
     an object."""
-    dt = data_types[data[0].encode('ascii')]
-    return dt.load(data[1:])
+    ident = data[0].encode('ascii')
+    if ident in data_types:
+        dt = data_types[ident]
+        return dt.load(data[1:])
+    # unknown
+    return None
 

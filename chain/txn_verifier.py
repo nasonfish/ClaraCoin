@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 import json
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
-
-BACKEND = default_backend()
+from util import sha256
 
 BLOCKS = [] # defined below. bad practice, I know, global variable
 
-def sha256(message):
-    digest = hashes.Hash(hashes.SHA256(), BACKEND)
-    digest.update(message)
-    return digest.finalize().hex()
 
 def verify(signature, data, public_key):
     try:
@@ -153,42 +146,59 @@ class BlockChain:
         self.blocks = blocks
 
     def add_block(self, block):
-        # DO ALL THE BLOCK VALIDATION AND REJECT IF UNACCEPTABLE
+        try:
+            block.verify()
+        except:
+            print("Block doesn't verify; do not add to chain")
+            return
+
         self.blocks.append(block)
 
     def get_tail(self):
         return self.blocks[-1]
 
     def verify(self):
-        pass  # CLARA TODO
+        for i in range( len(self.blocks)-1 ):
+            # Verify transactions of a block
+            if i > 0:
+                for txn in self.blocks[i+1].transactions:
+                    if not txn.verify():
+                        return False
+            # Check proof of work
+            block_id = self.blocks[i].get_hash()
+            if block_id != self.blocks[i+1].prev_hash:
+                return False
+        return True
 
     def serialize(self):
         return json.dumps(self.blocks)
 
+    def propose(self, *txns):
+        return BlockProposal(self.get_tail(), txns)
+
     @staticmethod
     def load(data):
-        self.blocks = json.loads(data)
+        return BlockChain(json.loads(data))
 
 class BlockProposal:
     def __init__(self, prev_block, transactions):
-        self.transactions = transactions
         self.prev_block = prev_block
+        self.transactions = []
+        for txn in transactions:
+            if txn.verify():
+                self.transactions = transactions.append(txn)
+        # TODO add "invent money" functionality
 
     def serialize(self):
         return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
 
-    def mine(self, prev_block, transactions):
-        valid_transactions = []
-        for txn in transactions:
-            if txn.verify():
-                valid_transactions.append(txn)
-
-        if len(valid_transactions) > 0:
-            while True:
-                magic_num = os.urandom(32).hex()
-                new_block = Block(prev_hash, magic_num, valid_transactions, 0)
-                if int(new_block.hash, 16) & 0xFFFF == 0x0:
-                    return new_block
+    def mine(self):
+        # if len(valid_transactions) > 0:
+        magic_num = os.urandom(32).hex()
+        new_block = Block(prev_hash, magic_num, valid_transactions, 0)
+        if int(new_block.hash, 16) & 0xFFFF == 0x0:
+            return new_block
+        return False # failed. maybe next time
 
 class BlockChainRequest:
 
