@@ -42,20 +42,33 @@ def userInterface():
 
 
 
-def balance(blockchain, public_key):
+def balance(blockChain, public_key):
     # Return the amount of clara coin attached to public key
-    for block in blockchain.blocks:
-        for outflow in i.outflows:
-            pass  # Russell TODO
-    return (transactions)
+    totalMoney = 0
+    transactions = []
+    for block in blockChain.blocks:
+        for outflow in block.outflows:
+            if (outflow.recipient == public_key):
+                transactions.append(outflow)
+                totalMoney += `money
+
+    return (transactions, totalMoney)
+
 def howMuchMoneyDoIHave(public_key):
-    #return amount of money user has
+    print("You have", str(balance(blockChain, public_key)[1]))
     return
 
 def verifyMoney(public_key, amount_spend):
-    # Return true if transaction money is less than getMoney
-    return getMoney(public_key) > amount_spend
+    #Calculate difference between totalMoney and money being spent
+    totalMoney = balance(blockChain, public_key)[1]
+    validTxn = total_money > amount_spend
+    moneyToSelf = totalMoney - amount_spend
+    return(validTxn, moneyToSelf)
 
-
+def calcOutflow(moneyToSelf, amount_spend):
+    outflow = []
+    if moneyToSelf != 0:
+        outflow.append( #An outflow of the remaining money to one self)
+    outflow.append(#An outflow of amount spend to oneself)
 if __name__ == '__main__':
-    userInterface()
+    #Verify Money
