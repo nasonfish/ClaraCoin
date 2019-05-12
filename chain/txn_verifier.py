@@ -170,7 +170,7 @@ class BlockChain:
 
     @staticmethod
     def load(data):
-        self.blocks = json.loads(data)
+        return BlockChain(json.loads(data))
 
 class BlockProposal:
     def __init__(self, prev_block, transactions):

@@ -3,7 +3,7 @@ import threading
 import json
 import time
 
-from txn_verifier import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
+from chain import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
 from mine_network import shout, recv
 
 TASK_NONE = 0
@@ -39,17 +39,16 @@ def loop():
 
 def mine_block(block_proposal):
     while task is TASK_MINING:
-        success = block_proposal.mine(): # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
-            return block_proposal
+        success = block_proposal.mine() # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
+        return block_proposal
     raise MiningInturrupt()
 
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
     obj = recv(line)
     if type(obj) is BlockChain:
-        if blockchain is not None:
-            return  # ignore
-        if not blockchain.verify():
+        print("recieved a blockchain")
+        if not obj.verify():
             print("bad blockchain")
             return  # bad blockchain
         print("good blockchain")
@@ -102,7 +101,7 @@ def request_blockchain():
     shout(sock, BlockChainRequest())
 
 if __name__ == '__main__':
-    sock.connect(('0.0.0.0',1264))
+    sock.connect((HOST, PORT))
     
     Client(sock).start()
     request_blockchain()
