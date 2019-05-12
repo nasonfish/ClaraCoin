@@ -1,8 +1,9 @@
 import socket
 import threading
 import json
+import time
 
-from txn_verifier import BlockChainRequest
+from txn_verifier import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
 from mine_network import shout, recv
 
 TASK_NONE = 0
@@ -14,12 +15,16 @@ task = TASK_MINING
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+blockchain = None
+
 class MiningInturrupt(Exception):
     pass
 
-def loop(starting_block):
+def loop():
+    while blockchain is None:
+        # waiting for blockchain
+        time.sleep(5)
     while True:
-        #prev_block = end of the current chain
         try:
             next_block = mine_block(starting_block)
             print("block mined: {}".format(next_block.serialize()))
@@ -35,18 +40,19 @@ def mine_block(block_proposal):
             return block_proposal
     raise MiningInturrupt()
 
-
-
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
     obj = recv(line)
     if type(obj) is BlockChain:
-        pass  # read in, or ignore if we have our own blockchain
+        global blockchain
+        if blockchain is not None:
+            return  # ignore
+        blockchain = obj
     elif type(obj) is Block:
         pass
     elif type(obj) is Transaction:
         pass
-    elif type(obj) if Confirmation:
+    elif type(obj) is Confirmation:
         pass
     elif type(obj) is BlockChainRequest:
         pass  # shout our blockchain
@@ -87,12 +93,12 @@ class TestBlockProposal:
         return json.dumps(['hello'])
 
 def request_blockchain():
-    shout(BlockChainRequest())
+    shout(sock, BlockChainRequest())
 
 if __name__ == '__main__':
     sock.connect(('0.0.0.0',1264))
     
     Client(sock).start()
     request_blockchain()
-    loop(TestBlockProposal())
+    loop()
 

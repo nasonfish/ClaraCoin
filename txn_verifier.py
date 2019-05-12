@@ -73,7 +73,7 @@ def verify(signature, data, public_key):
         return False
 
 class Block():
-    def __init__(self, name=None, prev_hash, magic_num, transactions, block_height):
+    def __init__(self, prev_hash, magic_num, transactions, block_height, name=None):
         self.prev_hash = prev_hash
         self.magic_num = magic_num
         self.transactions = transactions
@@ -139,7 +139,7 @@ class Block():
             return self.merkle( new_hashlist )
 
     def prune(self):
-        for i in range(len(self.transactions):
+        for i in range(len(self.transactions)):
             if self.transactions[i].is_spent():
                 self.transactions[i] = None
 
@@ -318,7 +318,9 @@ def printTxn( signed_txn ):
 BLOCK_FILES = ['Blocks/block0', 'Blocks/block2398', 'Blocks/block1530', 'Blocks/block3312', 'Blocks/block7123']
 # These are in order, but frankly do not need to be. code for ordering is commented up above
 for name in BLOCK_FILES:
-   BLOCKS.append(Block(name))
+    # TODO
+    pass
+    # BLOCKS.append(Block(name=name))
 for block in BLOCKS:
     block.set_prev(BLOCKS)
 
@@ -359,6 +361,7 @@ class Person:
         self.private_key = 12446
 
     def makeTransaction(self):
+        pass
 
     def mine(self, prev_block, transactions):
         valid_transactions = []
@@ -408,10 +411,12 @@ class BlockProposal:
 
 class BlockChainRequest:
 
-    def serialize():
+    def serialize(self):
         return ''
 
-    @classmethod
+    @staticmethod
     def load(data):
         return BlockChainRequest()
 
+class Confirmation:
+    pass

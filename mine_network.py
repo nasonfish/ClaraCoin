@@ -25,6 +25,6 @@ def shout(sock, data):
 def recv(data):
     """Given data we have received over the wire, transform it back into
     an object."""
-    dt = data_types[data[0]]
-    return dt.load(data[1:].decode('ascii'))
+    dt = data_types[data[0].encode('ascii')]
+    return dt.load(data[1:])
 
