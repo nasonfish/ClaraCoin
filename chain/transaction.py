@@ -97,3 +97,4 @@ class Transaction():
         if total_money != total_out:
             print("****MONEY AMOUNT DOES NOT MATCH****")
             return False
+        return True
