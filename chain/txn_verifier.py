@@ -165,30 +165,32 @@ class BlockChain:
     def serialize(self):
         return json.dumps(self.blocks)
 
+    def propose(self, *txns):
+        return BlockProposal(self.get_tail(), txns)
+
     @staticmethod
     def load(data):
         self.blocks = json.loads(data)
 
 class BlockProposal:
     def __init__(self, prev_block, transactions):
-        self.transactions = transactions
         self.prev_block = prev_block
+        self.transactions = []
+        for txn in transactions:
+            if txn.verify():
+                self.transactions = transactions.append(txn)
+        # TODO add "invent money" functionality
 
     def serialize(self):
         return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
 
-    def mine(self, prev_block, transactions):
-        valid_transactions = []
-        for txn in transactions:
-            if txn.verify():
-                valid_transactions.append(txn)
-
-        if len(valid_transactions) > 0:
-            while True:
-                magic_num = os.urandom(32).hex()
-                new_block = Block(prev_hash, magic_num, valid_transactions, 0)
-                if int(new_block.hash, 16) & 0xFFFF == 0x0:
-                    return new_block
+    def mine(self):
+        # if len(valid_transactions) > 0:
+        magic_num = os.urandom(32).hex()
+        new_block = Block(prev_hash, magic_num, valid_transactions, 0)
+        if int(new_block.hash, 16) & 0xFFFF == 0x0:
+            return new_block
+        return False # failed. maybe next time
 
 class BlockChainRequest:
 
