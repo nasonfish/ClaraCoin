@@ -159,6 +159,16 @@ class BlockChain:
     def get_tail(self):
         return self.blocks[-1]
 
+    def verify(self):
+        pass  # CLARA TODO
+
+    def serialize(self):
+        return json.dumps(self.blocks)
+
+    @staticmethod
+    def load(data):
+        self.blocks = json.loads(data)
+
 class BlockProposal:
     def __init__(self, prev_block, transactions):
         self.transactions = transactions
@@ -168,7 +178,6 @@ class BlockProposal:
         return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
 
     def mine(self, prev_block, transactions):
-
         valid_transactions = []
         for txn in transactions:
             if txn.verify():

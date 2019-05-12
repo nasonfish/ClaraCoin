@@ -26,7 +26,7 @@ def loop():
         time.sleep(5)
     while True:
         try:
-            next_block = mine_block(starting_block)
+            next_block = mine_block(blockchain.get_tail()) # blocks until mining successful or state change
             print("block mined: {}".format(next_block.serialize()))
             sock.send(next_block.serialize().encode('ascii') + b'\n')
             starting_block = next_block
