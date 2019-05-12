@@ -42,8 +42,11 @@ def userInterface():
 
 
 
-def getMoney(public_key):
-    #Return the amount of clara coin attached to public key
+def balance(blockchain, public_key):
+    # Return the amount of clara coin attached to public key
+    for block in blockchain.blocks:
+        for outflow in i.outflows:
+            pass  # Russell TODO
     return (transactions)
 def howMuchMoneyDoIHave(public_key):
     #return amount of money user has
