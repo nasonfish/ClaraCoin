@@ -2,21 +2,11 @@ import json
 from util import sha256
 
 class Transaction():
-    def __init__(self, public_key, inflows, outflows, data=None, private_key=None, signature=None):
+    def __init__(self, public_key, inflows, outflows, signature, data=None):
         self.public_key = public_key
         self.inflows = inflows
         self.outflows = outflows
-
-        body = { "public_key": self.public_key,
-                  "inflows": self.inflows,
-                  "outflows": self.outflows }
-
-        if private_key:
-            self.signature = private_key.sign( json.dumps( body ).encode("ascii") )
-        elif signature:
-            self.signature = signature
-        else:
-            raise Exception("A transaction must be signed.")
+        self.signature = signature
 
 
     def serialize(self):
@@ -42,7 +32,7 @@ class Transaction():
         # self.outflows = []
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
-        return Transaction(obj_dict["data"]["body"]["public_key"], obj_dict["data"]["body"]["inflows"], obj_dict["data"]["body"]["outflows"], signature="adsfhjklasdhfkjsdlahfjkldsahjkalfsdhkj")
+        return Transaction(obj_dict["data"]["body"]["public_key"], obj_dict["data"]["body"]["inflows"], obj_dict["data"]["body"]["outflows"], obj_dict["data"]["signature"])
 
     def get_hash(self):
         data = { "signature": self.signature,
