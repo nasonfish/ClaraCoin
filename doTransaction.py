@@ -65,10 +65,24 @@ def verifyMoney(public_key, amount_spend):
     moneyToSelf = totalMoney - amount_spend
     return(validTxn, moneyToSelf)
 
-def calcOutflow(moneyToSelf, amount_spend):
+def calcOutflow(user_public_key, recip_public_key, moneyToSelf, amount_spend):
     outflow = []
     if moneyToSelf != 0:
-        outflow.append( #An outflow of the remaining money to one self)
-    outflow.append(#An outflow of amount spend to oneself)
+        outflow.append(
+        #Something like this
+            "outflows": [
+    		{
+    			"recipient": user_public_key,
+    			"number_of_coins": moneyToSelf
+    		}
+    outflow.append(
+    "outflows": [
+    {
+        "recipient": recip_public_key,
+        "number_of_coins": amount_spend
+    }
+
+
 if __name__ == '__main__':
     #Verify Money
+    print("some functions should be here")
