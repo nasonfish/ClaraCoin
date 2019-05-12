@@ -16,7 +16,7 @@ class Transaction():
 
 
     def serialize(self):
-        return json.dumps( { "hash": self.hash,
+        return json.dumps( { "hash": self.get_hash(),
                              "data": { "signature": self.signature,
                                         "body": { "public_key": self.public_key,
                                                   "inflows": self.inflows,
@@ -28,9 +28,9 @@ class Transaction():
     @staticmethod
     def load(obj_str):
         obj_dict = json.loads(obj_str)
-        self.public_key = obj_dict["data"]["body"]["public_key"]
-        self.inflows = obj_dict["data"]["body"]["inflows"]
-        self.outflows = obj_dict["data"]["body"]["outflows"]
+        # self.public_key = obj_dict["data"]["body"]["public_key"]
+        # self.inflows = obj_dict["data"]["body"]["inflows"]
+        # self.outflows = obj_dict["data"]["body"]["outflows"]
 
         # self.inflows = []
         # for i in self.txn[1][1]:
@@ -38,10 +38,15 @@ class Transaction():
         # self.outflows = []
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
+        return Transaction(obj_dict["data"]["body"]["public_key"], obj_dict["data"]["body"]["inflows"], obj_dict["data"]["body"]["outflows"])
 
     def get_hash(self):
-        obj_str = self.serialize()
-        return sha256( json.dumps( obj_str["data"] ).encode("ascii") )
+        data = { "signature": self.signature,
+                 "body": { "public_key": self.public_key,
+                             "inflows": self.inflows,
+                             "outflows": self.outflows }
+               }
+        return sha256( json.dumps( data ).encode("ascii") )
 
     def is_spent(self, blockchain):
         # for each outflow in this transaction, go through all blocks that were
