@@ -42,17 +42,21 @@ def userInterface():
 
 
 
-def balance(blockChain, public_key):
-    # Return the amount of clara coin attached to public key
-    totalMoney = 0
+def balance(blockchain, public_key):
+    """Get all the money associated with a public key within a particular blockchain"""
+    total = 0
     transactions = []
-    for block in blockChain.blocks:
+    for block in blockchain.blocks:
         for outflow in block.outflows:
-            if (outflow.recipient == public_key):
+            if outflow.recipient == public_key:
                 transactions.append(outflow)
-                totalMoney += `money
-
-    return (transactions, totalMoney)
+                total += outflow.coins
+        for inflow in block.inflows:
+            for accounted in transactions:  # bad searching. oh well. blockchain is slow anyway
+                if accounted.id == inflow.txn_id:
+                    transactions.remove(accounted)
+                    total -= accounted.coins
+    return transactions, total
 
 def howMuchMoneyDoIHave(public_key):
     print("You have", str(balance(blockChain, public_key)[1]))
@@ -81,6 +85,13 @@ def calcOutflow(user_public_key, recip_public_key, moneyToSelf, amount_spend):
         "recipient": recip_public_key,
         "number_of_coins": amount_spend
     }
+
+# TODO all of these have the blockchain argument. maybe they belong
+# in the blockchain class
+def build_flows(blockchain, from_public, to_public, amount):
+    transactions, total = balance(blockchain, from_public)
+    for i in transactions:
+        InFlow()
 
 
 if __name__ == '__main__':

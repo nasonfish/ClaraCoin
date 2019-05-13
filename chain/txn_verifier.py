@@ -37,9 +37,10 @@ class InFlow():
             self.money = -1
         if self.txn is None:
             raise Exception("no previous block/transaction found for block {} transaction {}".format(block_id, txn_id))
-    def get_blockId(self):
+
+    def get_block_id(self):
         return self.block_id
-    def get_txnId(self):
+    def get_txn_id(self):
         return self.txn_id
 
 class OutFlow():
@@ -96,26 +97,6 @@ if __name__ == "__main__":
         #print(i)
         i.verify()
 
-
-# chain = BLOCKS
-
-if __name__ == '__main__':
-    """TESTS / Our homework assignment."""
-    BLOCK_FILES = ['BLocks/block0', 'BLocks/block2398', 'BLocks/block1530', 'BLocks/block3312', 'BLocks/block7123']
-    # These are in order, but frankly do not need to be. code for ordering is commented up above
-    for filename in BLOCK_FILES:
-        BLOCKS.append( Block.load(filename) )
-
-    for block in BLOCKS:
-        block.set_prev(BLOCKS)
-
-def add_to_chain(block):
-    return
-    # do verification, add to our list
-
-def mine(*txns):
-    """return a block"""
-    # pack this list of transactions into a block, verify them, and mine the block
 
 
 class Person:
@@ -211,3 +192,12 @@ class BlockChainRequest:
 
 class Confirmation:
     pass
+
+if __name__ == '__main__':
+    """TESTS / Our homework assignment."""
+    BLOCK_FILES = ['Blocks/block0', 'Blocks/block2398', 'Blocks/block1530', 'Blocks/block3312', 'Blocks/block7123']
+    for filename in BLOCK_FILES:
+        BLOCKS.append( Block.load(filename) )
+    for block in BLOCKS:
+        block.set_prev(BLOCKS)
+
