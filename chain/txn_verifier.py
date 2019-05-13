@@ -37,7 +37,7 @@ class OutFlow():
         self.txn_idx = None
 
 
-    '''Return true if there is a transactions in a block such that an inflow is
+    '''Return true if there is a transaction in a block such that an inflow is
     coming from this outflow'''
     def is_spent(self):
         # TODO: ideally, we wouldn't have to go through the whole chain but only those blocks formed after
