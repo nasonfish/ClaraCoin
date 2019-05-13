@@ -10,18 +10,19 @@ class Transaction():
 
 
     def serialize(self):
-        return json.dumps( { "hash": self.get_hash(),
+        return { "hash": self.get_hash(),
                              "data": { "signature": self.signature,
                                         "body": { "public_key": self.public_key,
                                                   "inflows": self.inflows,
                                                   "outflows": self.outflows }
                                        }
-                            })
+                            }
 
 
     @staticmethod
-    def load(obj_str):
-        obj_dict = json.loads(obj_str)
+    def load(input):
+        if type(input) == str:
+            input = json.loads(obj_str)
         # self.public_key = obj_dict["data"]["body"]["public_key"]
         # self.inflows = obj_dict["data"]["body"]["inflows"]
         # self.outflows = obj_dict["data"]["body"]["outflows"]
@@ -32,7 +33,7 @@ class Transaction():
         # self.outflows = []
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
-        return Transaction(obj_dict["data"]["body"]["public_key"], obj_dict["data"]["body"]["inflows"], obj_dict["data"]["body"]["outflows"], obj_dict["data"]["signature"])
+        return Transaction(input["data"]["body"]["public_key"], input["data"]["body"]["inflows"], input["data"]["body"]["outflows"], input["data"]["signature"])
 
     def get_hash(self):
         data = { "signature": self.signature,

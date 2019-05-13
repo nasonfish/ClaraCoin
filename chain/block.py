@@ -5,37 +5,39 @@ from chain import Transaction
 
 
 class Block():
-    def __init__(self, prev_hash, transactions, block_idx, magic_num=None):
-        self.prev_hash = prev_hash
+    def __init__(self, prev_block, transactions, block_idx, magic_num=None):
+        self.prev_block = prev_block
         self.magic_num = magic_num
         self.transactions = transactions
         self.block_idx = block_idx
         self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
+    @staticmethod
+    def load(obj_str):
+        obj_dict = json.loads(obj_str)
+        return Block(obj_dict["prev_block"], [ Transaction.load( txn_dict ) for txn_dict in obj_dict["transactions"] ], obj_dict["block_idx"], obj_dict["magic_num"])
+
+    def serialize(self):
+        return { "hash": self.get_hash(),
+                             "prev_block": self.prev_block,
+                             "magic_num": self.magic_num,
+                             "merkleroot": self.merkleroot,
+                             "transactions": [txn.serialize() for txn in self.transactions],
+                             "block_idx": self.block_idx }
+
+    def get_hash(self):
+        print( "prev_block type: ", type(self.prev_block), "magic type: ", type(self.magic_num), "merkleroot type: ", type(self.merkleroot))
+        return sha256( self.prev_block.encode("ascii") + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
+
     def set_magic_num(self, magic_num):
         self.magic_num = magic_num
 
-    @classmethod
-    def load(self, filename):
-        with open(filename, 'rb') as f:
-            f_bytes = f.read()
-            self.hash = sha256(f_bytes)
-            self.raw = json.loads(f_bytes.decode( "ascii" ))
-            self.magic_number = self.raw[0]
-            self.prev_hash = self.raw[1]
-            self.transactions = []
-            for i in self.raw[2]:
-                self.transactions.append(Transaction(data=i))
-            self.merkleroot = self.merkle([ txn.txn_hash for txn in self.transactions ])
-            # print("merkleroot: ", self.merkleroot)
-            self.block_height = None
-
     def set_prev(self, blocks):
-        if self.prev_hash == 0:
+        if self.prev_block == 0:
             self.prev = None
             return
         for i in blocks:
-            if i.hash == self.prev_hash:
+            if i.hash == self.prev_block:
                 self.prev = i
                 return
 
@@ -52,11 +54,6 @@ class Block():
                         return False
         return True
 
-    def serialize(self):
-        return json.dumps([self.hash, self.prev_block.hash, self.magic_num, self.block_height, self.merkleroot, [txn.serialize for txn in self.transactions]])
-
-    def get_hash(self):
-        return sha256( bytes.fromhex(self.prev_hash) + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
 
     def merkle( self, hashlist ):
         if len(hashlist) == 0:
@@ -77,11 +74,11 @@ class Block():
                 self.transactions[i] = None
 
     def set_prev(self, blocks):
-        if self.prev_hash == 0:
+        if self.prev_block == 0:
             self.prev = None
             return
         for i in blocks:
-            if i.hash == self.prev_hash:
+            if i.hash == self.prev_block:
                 self.prev = i
                 return
 
@@ -110,7 +107,7 @@ class BlockChain:
                         return False
             # Check proof of work
             block_id = self.blocks[i].get_hash()
-            if block_id != self.blocks[i+1].prev_hash:
+            if block_id != self.blocks[i+1].prev_block:
                 return False
         return True
 
@@ -155,4 +152,3 @@ class BlockChainRequest:
 
 class Confirmation:
     pass
-

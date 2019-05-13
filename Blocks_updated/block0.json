@@ -3,7 +3,7 @@
 	"hash": "a7ad8deacae1681833b9ad7657112e986d4dc71c0bdc66deaacf3b221b48cccc",
 	"magic_num": "3f24be47e87a2c663539ed7d1cd4803474682e78f03988b9257e111fe75c63e2",
 	"merkleroot": "133eb68d6ad7f9f4e98be42f0e03202800917bdd1ebf546b793b3b7c84791e07",
-	"prev_block": 0,
+	"prev_block": "0",
 	"transactions": [
 										{
 											"data":
