@@ -1,4 +1,10 @@
-from chain import transaction
+from chain import transaction, Block
+
+#Get block chain
+
+with open("block0", 'rb') as f:
+    json.loads(f.read().decode("ascii"))
+    Block.loads("Blocks_updated/block0.json")
 
 def userInterface():
     #Check for valid public key
@@ -84,7 +90,10 @@ def calcOutflow(user_public_key, recip_public_key, moneyToSelf, amount_spend):
     {
         "recipient": recip_public_key,
         "number_of_coins": amount_spend
-    }
+    }]
+    )
+    return
+
 
 # TODO all of these have the blockchain argument. maybe they belong
 # in the blockchain class
