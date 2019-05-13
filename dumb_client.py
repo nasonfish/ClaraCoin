@@ -25,11 +25,20 @@ class MiningInturrupt(Exception):
 def loop():
     while blockchain is None:
         # waiting for blockchain
+        print("Waiting for blockchain...")
         time.sleep(5)
     while True:
         try:
             pack = tuple(transactions)
-            next_block = blockchain.add_block(mine_block(blockchain.propose(*pack))) # blocks until mining successful or state change
+            try:
+                proposal = blockchain.propose(*pack)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                print("Waiting for transactions...")  # TODO invent new money as a transaction
+                time.sleep(5)
+                continue
+            next_block = blockchain.add_block(mine_block(proposal)) # blocks until mining successful or state change
             print("block mined: {}".format(next_block.serialize()))
             for i in pack:
                 transactions.remove(i)  # these have been included already :)
@@ -40,7 +49,8 @@ def loop():
 def mine_block(block_proposal):
     while task is TASK_MINING:
         success = block_proposal.mine() # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
-        return block_proposal
+        if success:
+            return success
     raise MiningInturrupt()
 
 def process_line(line):

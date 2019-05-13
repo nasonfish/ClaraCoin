@@ -6,11 +6,14 @@ from chain import Transaction
 
 class Block():
     def __init__(self, prev_block, transactions, block_idx, magic_num=None):
-        self.prev_block = prev_block
+        if type(prev_block) == int:
+            prev_block = str(prev_block)
+        self.prev_block = prev_block  # hex
         self.magic_num = magic_num
         self.transactions = transactions
         print(type(self.transactions[0]))
         self.block_idx = block_idx
+        print(self.transactions)
         self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
     @staticmethod
@@ -28,7 +31,11 @@ class Block():
                              "block_idx": self.block_idx }
 
     def get_hash(self):
-        return sha256( self.prev_block.encode("ascii") + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
+        if self.prev_block == "0":
+            prev_hex = b"0"
+        else:
+            prev_hex = bytes.fromhex(self.prev_block)
+        return sha256( prev_hex + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
 
     def set_magic_num(self, magic_num):
         self.magic_num = magic_num
@@ -83,6 +90,9 @@ class Block():
                 self.prev = i
                 return
 
+    def verify(self):
+        return True  # TODO
+
 class BlockChain:
     def __init__(self, blocks):
         self.blocks = blocks
@@ -91,6 +101,8 @@ class BlockChain:
         try:
             block.verify()
         except:
+            import traceback
+            traceback.print_exc()
             print("Block doesn't verify; do not add to chain")
             return
 
@@ -116,6 +128,7 @@ class BlockChain:
         return [block.serialize() for block in self.blocks]
 
     def propose(self, *txns):
+        print("proposing transactions", txns)
         return BlockProposal(self.get_tail(), txns)
 
     @staticmethod
@@ -130,8 +143,10 @@ class BlockProposal:
         self.transactions = []
         for txn in transactions:
             if txn.verify():
-                self.transactions = transactions.append(txn)
+                self.transactions.append(txn)
         # TODO add "invent money" functionality
+        if len(self.transactions) == 0:
+            raise Exception("Cannot propose an empty block.")
 
     def serialize(self):
         return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
@@ -139,10 +154,11 @@ class BlockProposal:
     def mine(self):
         # if len(valid_transactions) > 0:
         magic_num = os.urandom(32).hex()
-        new_block = Block(self.prev_block, magic_num, self.transactions, 0)
-        if int(new_block.hash, 16) & 0xFFFF == 0x0:
+        # def __init__(self, prev_block, transactions, block_idx, magic_num=None):
+        new_block = Block(self.prev_block.block_idx, self.transactions, str(int(self.prev_block.block_idx) + 1), magic_num)
+        if int(new_block.get_hash(), 16) & 0xFFFF == 0x0:
             return new_block
-        return False # failed. maybe next time
+        return False  # failed. maybe next time
 
 class BlockChainRequest:
 
