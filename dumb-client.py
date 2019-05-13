@@ -46,6 +46,7 @@ def mine_block(block_proposal):
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
     obj = recv(line)
+    global blockchain
     if type(obj) is BlockChain:
         print("recieved a blockchain")
         if not obj.verify():
@@ -60,7 +61,8 @@ def process_line(line):
     elif type(obj) is Confirmation:
         pass
     elif type(obj) is BlockChainRequest:
-        pass  # shout our blockchain
+        if blockchain:
+            shout(sock, blockchain)
     else:
         pass  # ignore?
 
