@@ -27,7 +27,6 @@ class Block():
                              "block_idx": self.block_idx }
 
     def get_hash(self):
-        print( "prev_block type: ", type(self.prev_block), "magic type: ", type(self.magic_num), "merkleroot type: ", type(self.merkleroot))
         return sha256( self.prev_block.encode("ascii") + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
 
     def set_magic_num(self, magic_num):

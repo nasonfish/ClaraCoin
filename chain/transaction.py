@@ -1,8 +1,9 @@
 import json
-from util import sha256
+from util import sha256, sign
+from chain import InFlow, OutFlow
 
 class Transaction():
-    def __init__(self, public_key, inflows, outflows, signature, data=None):
+    def __init__(self, public_key, inflows, outflows, signature):
         self.public_key = public_key
         self.inflows = inflows
         self.outflows = outflows
@@ -13,16 +14,22 @@ class Transaction():
         return { "hash": self.get_hash(),
                              "data": { "signature": self.signature,
                                         "body": { "public_key": self.public_key,
-                                                  "inflows": self.inflows,
-                                                  "outflows": self.outflows }
+                                                  "inflows": [inflow.serialize() for inflow in self.inflows],
+                                                  "outflows": [outflow.serialize() for outflow in self.outflows] }
                                        }
                             }
 
 
     @staticmethod
-    def load(input):
-        if type(input) == str:
-            input = json.loads(obj_str)
+    def build_signed_txn(public_key, inflows, outflows, signing_key):
+        body = { "public_key": public_key, "inflows": [inflow.serialize() for inflow in inflows], "outflows": [outflow.serialize() for outflow in outflows] }
+        signature = sign(json.dumps(body), signing_key)
+        return Transaction(public_key, inflows, outflows, signature)
+
+    @staticmethod
+    def load(inp):
+        if type(inp) == str:
+            inp = json.loads(inp)
         # self.public_key = obj_dict["data"]["body"]["public_key"]
         # self.inflows = obj_dict["data"]["body"]["inflows"]
         # self.outflows = obj_dict["data"]["body"]["outflows"]
@@ -33,14 +40,23 @@ class Transaction():
         # self.outflows = []
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
-        return Transaction(input["data"]["body"]["public_key"], input["data"]["body"]["inflows"], input["data"]["body"]["outflows"], input["data"]["signature"])
+        print(inp)
+        return Transaction(
+            inp["data"]["body"]["public_key"], 
+            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]], 
+            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]], 
+            inp["data"]["signature"]
+        )
 
     def get_hash(self):
-        data = { "signature": self.signature,
-                 "body": { "public_key": self.public_key,
-                             "inflows": self.inflows,
-                             "outflows": self.outflows }
-               }
+        data = {
+            "signature": self.signature,
+            "body": { 
+                "public_key": self.public_key, 
+                "inflows": [inflow.serialize() for inflow in self.inflows], 
+                "outflows": [outflow.serialize() for outflow in self.outflows] 
+            }
+        }
         return sha256( json.dumps( data ).encode("ascii") )
 
     def is_spent(self, blockchain):
@@ -57,11 +73,11 @@ class Transaction():
         public_key = bytes.fromhex(self.txn[1][0])
         return verify(signature, bytes.fromhex(self.txn_hash), public_key)
 
-    def double_spends(self, public_key, inFlows):
+    def double_spends(self, public_key, inflows):
         for i in BLOCKS:
             #Check for every block
             #Check for every block id in transaction
-            if not(i.double_spends(public_key, inFlows.get_blockId(), inFlows.get_txnId())):
+            if not(i.double_spends(public_key, inflows.get_blockId(), inflows.get_txnId())):
                 print("FALSE")
                 return False
         return True

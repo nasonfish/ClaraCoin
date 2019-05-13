@@ -1,5 +1,6 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
 BACKEND = default_backend()
 
@@ -10,11 +11,15 @@ def sha256(message):
 
 def verify(signature, data, public_key):
     try:
-        ed25519.Ed25519PublicKey.from_public_bytes(public_key).verify(signature, data)
+        ed25519.Ed25519PublicKey.from_public_bytes(public_key).verify(bytes.fromhex(signature), data)
         return True
     except InvalidSignature:
         return False
 
+def sign(data, private_key):
+    pri_bytes = bytes.fromhex(private_key)
+    key = ed25519.Ed25519PrivateKey.from_private_bytes(pri_bytes)
+    return key.sign(data.encode('ascii')).hex()
 
 def printTxn( signed_txn ):
 	print( "  Signature: %s" % signed_txn[ 0 ] )

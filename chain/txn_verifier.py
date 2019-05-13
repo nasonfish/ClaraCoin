@@ -1,42 +1,45 @@
 #!/usr/bin/env python3
 import json
 import os
-from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
 from util import sha256, verify
 
 class InFlow():
-    def __init__(self, recipient, block_id, txn_id):
+    def __init__(self, owner, block_id, txn_id):
+        self.owner = owner
         self.block_id = block_id
         self.txn_id = txn_id
         self.txn = None
-        if block_id is None or txn_id is None:
-            self.txn = None
         self.money = 0
-        for i in BLOCKS:
-            if i.hash == block_id:
-                self.txn = i.transactions[txn_id]
-                for i in self.txn.outflows:
-                    if i.recipient == recipient:
-                        self.money += i.money
-        if self.money == 0:
-            raise Exception("Transaction referenced from previous block but not found.")
-        if self.txn is None:
-            raise Exception("no previous block/transaction found for block {} transaction {}".format(block_id, txn_id))
 
     def get_block_id(self):
         return self.block_id
+
     def get_txn_id(self):
         return self.txn_id
 
+    @staticmethod
+    def load(data):
+        if type(data) == str:
+            data = json.loads(data)
+        return InFlow(data["owner"], data['block_id'], data['txn_id'])
+
+    def serialize(self):
+        return {'owner': self.owner, 'block_id': self.block_id, 'txn_id': self.txn_id}
+
 class OutFlow():
     def __init__(self, coins, recipient):
-        self.money = coins
+        self.coins = coins
         self.recipient = recipient
         self.block_id = None
         self.txn_idx = None
 
-
+    @staticmethod
+    def load(data):
+        if type(data) == str:
+            data = json.loads(data)
+        return OutFlow(data["number_of_coins"], data['recipient'])
+    
     '''Return true if there is a transaction in a block such that an inflow is
     coming from this outflow'''
     def is_spent(self):
@@ -49,6 +52,9 @@ class OutFlow():
                         if self.block_id == inflow.block_id and self.txn_idx == inflow.txn_idx:
                             return True
         return False
+
+    def serialize(self):
+        return {'number_of_coins': self.coins, 'recipient': self.recipient}
 
 class Person:
     def __init__(self):
