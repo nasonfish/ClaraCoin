@@ -14,9 +14,10 @@ class Block():
         self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
     @staticmethod
-    def load(obj_str):
-        obj_dict = json.loads(obj_str)
-        return Block(obj_dict["prev_block"], [ Transaction.load( txn_dict ) for txn_dict in obj_dict["transactions"] ], obj_dict["block_idx"], obj_dict["magic_num"])
+    def load(obj):
+        if type(obj) == str:
+            obj = json.loads(obj)
+        return Block(obj["prev_block"], [ Transaction.load( txn_dict ) for txn_dict in obj["transactions"] ], obj["block_idx"], obj["magic_num"])
 
     def serialize(self):
         return { "hash": self.get_hash(),
@@ -112,14 +113,16 @@ class BlockChain:
         return True
 
     def serialize(self):
-        return json.dumps(self.blocks)
+        return [block.serialize() for block in self.blocks]
 
     def propose(self, *txns):
         return BlockProposal(self.get_tail(), txns)
 
     @staticmethod
     def load(data):
-        return BlockChain(json.loads(data))
+        if type(data) == str:
+            data = json.loads(data)
+        return BlockChain([Block.load(d) for d in data])
 
 class BlockProposal:
     def __init__(self, prev_block, transactions):

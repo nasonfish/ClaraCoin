@@ -1,4 +1,5 @@
 from chain import BlockChain, Block, Transaction, Confirmation, BlockChainRequest
+import json
 
 data_types = {b'1': BlockChain, b'\x02': Block, b'\x03': Transaction, b'\x04': Confirmation, b'\x05': BlockChainRequest}
 
@@ -7,7 +8,7 @@ def send_format(data):
     (with metadata to be understood by recv_format())"""
     for i in data_types:
         if type(data) == data_types[i]:
-            return i + data.serialize().encode('ascii')
+            return i + json.dumps(data.serialize()).encode('ascii')
     return None
 
 def shout(sock, data):

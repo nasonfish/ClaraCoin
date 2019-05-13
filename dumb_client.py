@@ -91,6 +91,10 @@ class Client(threading.Thread):
 HOST = 'localhost'
 PORT = 1264
 
+
+def request_blockchain():
+    shout(sock, BlockChainRequest())
+
 class TestBlockProposal:
     def __init__(self):
         pass
@@ -99,13 +103,10 @@ class TestBlockProposal:
     def serialize(self):
         return json.dumps(['hello'])
 
-def request_blockchain():
-    shout(sock, BlockChainRequest())
 
 if __name__ == '__main__':
     sock.connect((HOST, PORT))
-    
+
     Client(sock).start()
     request_blockchain()
     loop()
-
