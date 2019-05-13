@@ -1,10 +1,19 @@
-from chain import transaction, Block
-
+from chain import transaction, Block, BlockChain
+from initial_user import getInitialUser
 #Get block chain
 
-with open("block0", 'rb') as f:
-    json.loads(f.read().decode("ascii"))
-    Block.loads("Blocks_updated/block0.json")
+
+PUBLIC_USER_ROOT = "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743"
+PRIVATE_USER_ROOT = "1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81e932b"
+
+PUBLIC_USER_OTHER = "ee00e543db3b7b5508821b211151d7cea8187613f25bcf3037bbb38bfa7c4dc7"
+PRIVATE_USER_OTHER = "7ed318d6602e38caa1a519efb26662a2ad7aa133fbf13d4ed9d09dfc5b58f9b6"
+
+
+block0 = getInitialUser()
+print(type(block0))
+BlockChain = BlockChain([block0])
+## TEMP fix to get block object
 
 def userInterface():
     #Check for valid public key
@@ -48,29 +57,33 @@ def userInterface():
 
 
 
-def balance(blockchain, public_key):
+def balance(public_key):
     """Get all the money associated with a public key within a particular blockchain"""
     total = 0
     transactions = []
-    for block in blockchain.blocks:
-        for outflow in block.outflows:
-            if outflow.recipient == public_key:
-                transactions.append(outflow)
-                total += outflow.coins
-        for inflow in block.inflows:
-            for accounted in transactions:  # bad searching. oh well. blockchain is slow anyway
-                if accounted.id == inflow.txn_id:
-                    transactions.remove(accounted)
-                    total -= accounted.coins
+    print(BlockChain.blocks)
+    for block in BlockChain.blocks:
+        for txn in block.transactions:
+            print(type(txn))
+            for outflow in txn.outflows:
+                print(outflow)
+                if outflow.recipient == public_key:
+                    transactions.append(outflow)
+                    total += outflow.coins
+            for inflow in block.inflows:
+                for accounted in transactions:  # bad searching. oh well. blockchain is slow anyway
+                    if accounted.id == inflow.txn_id:
+                        transactions.remove(accounted)
+                        total -= accounted.coins
     return transactions, total
 
 def howMuchMoneyDoIHave(public_key):
-    print("You have", str(balance(blockChain, public_key)[1]))
+    print("You have", str(balance(public_key)[1]))
     return
 
 def verifyMoney(public_key, amount_spend):
     #Calculate difference between totalMoney and money being spent
-    totalMoney = balance(blockChain, public_key)[1]
+    totalMoney = balance(BlockChain, public_key)[1]
     validTxn = total_money > amount_spend
     moneyToSelf = totalMoney - amount_spend
     return(validTxn, moneyToSelf)
@@ -78,31 +91,18 @@ def verifyMoney(public_key, amount_spend):
 def calcOutflow(user_public_key, recip_public_key, moneyToSelf, amount_spend):
     outflow = []
     if moneyToSelf != 0:
-        outflow.append(
-        #Something like this
-            "outflows": [
-    		{
-    			"recipient": user_public_key,
-    			"number_of_coins": moneyToSelf
-    		}
-    outflow.append(
-    "outflows": [
-    {
-        "recipient": recip_public_key,
-        "number_of_coins": amount_spend
-    }]
-    )
+        outflow.append('"outflows": [{"recipient": user_public_key,"number_of_coins": moneyToSelf}]')
+    outflow.append('"outflows": [{"recipient": recip_public_key,"number_of_coins": amount_spend}]')
     return
 
 
 # TODO all of these have the blockchain argument. maybe they belong
 # in the blockchain class
 def build_flows(blockchain, from_public, to_public, amount):
-    transactions, total = balance(blockchain, from_public)
+    transactions, total = balance(BlockChain, from_public)
     for i in transactions:
         InFlow()
 
 
 if __name__ == '__main__':
-    #Verify Money
-    print("some functions should be here")
+    howMuchMoneyDoIHave(PUBLIC_USER_ROOT)

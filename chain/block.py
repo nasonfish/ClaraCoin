@@ -9,6 +9,7 @@ class Block():
         self.prev_block = prev_block
         self.magic_num = magic_num
         self.transactions = transactions
+        print(type(self.transactions[0]))
         self.block_idx = block_idx
         self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 

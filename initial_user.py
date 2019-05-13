@@ -18,7 +18,7 @@ def main():
     print(private_bytes.hex())
     '''
     # 1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81e932b
-    private_key = ed25519.Ed25519PrivateKey.from_private_bytes( bytes.fromhex("1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81e932b") )
+    #private_key = ed25519.Ed25519PrivateKey.from_private_bytes( bytes.fromhex("1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81e932b") )
 
     '''
     public_key = private_key.public_key()
@@ -29,14 +29,48 @@ def main():
     print(public_bytes.hex())
     '''
     # 75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743
+    # public_key = ed25519.Ed25519PublicKey.from_public_bytes( bytes.fromhex("75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743") )
+
+
+    # with open("Blocks_updated/block0.json", 'r') as f:
+    #     block = json.loads( f.read() )
+    #     pprint.pprint(block)
+    #     txn = Transaction.load( json.dumps( block["transactions"][0] ) )
+    #
+    #     # txn = block["transactions"][0]["data"]
+    #     # signature = private_key.sign( json.dumps( txn["body"] ).encode("ascii") )
+    #     # public_key.verify(signature, json.dumps( txn["body"] ).encode("ascii") )
+    #     # block['transactions'][0]["data"]["signature"] = signature.hex()
+    #     # block['transactions'][0]["hash"] = sha256( json.dumps( block['transactions'][0]["data"] ).encode("ascii") )
+    #
+    #     block["transactions"][0]["data"]["signature"] = private_key.sign( json.dumps( block["transactions"][0]["data"]["body"] ).encode("ascii") ).hex( )
+    #     block["transactions"][0]["hash"] = txn.get_hash()
+    #
+    #
+    #     block_obj = Block( b"\x00".hex(), [ txn ], 0 )
+    #     block["merkleroot"] = block_obj.merkleroot
+    #
+    #     success = False
+    #     while not success:
+    #         magic_num = os.urandom(32).hex()
+    #         block_obj.set_magic_num( magic_num )
+    #         if int(block_obj.get_hash(), 16) & 0xFFFF == 0xCCCC:
+    #             success = True
+    #
+    #
+    #     block["hash"] = block_obj.get_hash()
+    #     block["magic_num"] = block_obj.magic_num
+    block = generateInitialUser()
+    pprint.pprint(block)
+
+def getInitialUser():
+    private_key = ed25519.Ed25519PrivateKey.from_private_bytes( bytes.fromhex("1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81e932b") )
     public_key = ed25519.Ed25519PublicKey.from_public_bytes( bytes.fromhex("75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743") )
-
-
     with open("Blocks_updated/block0.json", 'r') as f:
         block = json.loads( f.read() )
-        pprint.pprint(block)
+        #pprint.pprint(block)
         txn = Transaction.load( json.dumps( block["transactions"][0] ) )
-
+        print(type(txn))
         # txn = block["transactions"][0]["data"]
         # signature = private_key.sign( json.dumps( txn["body"] ).encode("ascii") )
         # public_key.verify(signature, json.dumps( txn["body"] ).encode("ascii") )
@@ -60,9 +94,7 @@ def main():
 
         block["hash"] = block_obj.get_hash()
         block["magic_num"] = block_obj.magic_num
-
-        pprint.pprint(block)
-
+    return block_obj
 
 if __name__ == '__main__':
     main()
