@@ -76,7 +76,7 @@ class Block():
                 return
 
     def verify(self, blockchain):
-        return False in [txn.verify(blockchain) for txn in self.transactions]
+        return False in [txn.verify(blockchain, self) for txn in self.transactions]
 
 class BlockChain:
     def __init__(self, blocks):
@@ -98,11 +98,12 @@ class BlockChain:
         return self.blocks[-1]
 
     def verify(self):
+
         for i in range( len(self.blocks)-1 ):
             # Verify transactions of a block
             if i > 0:
                 for txn in self.blocks[i+1].transactions:
-                    if not txn.verify(self):
+                    if not txn.verify(self, self.blocks[i+1]):
                         return False
             # Check proof of work
             block_id = self.blocks[i].get_hash()
@@ -129,20 +130,20 @@ class BlockProposal:
         self.prev_block = prev_block
         self.transactions = []
         for txn in transactions:
-            if txn.verify(blockchain):
+            if txn.verify(blockchain, None):
                 self.transactions.append(txn)
         # TODO add "invent money" functionality
         if len(self.transactions) == 0:
             raise Exception("Cannot propose an empty block.")
 
     def serialize(self):
-        return json.dumps([self.magic_num, self.prev_block.hash, [txn.serialize for txn in self.transactions]])
+        return json.dumps([self.magic_num, self.prev_block.get_hash(), [txn.serialize for txn in self.transactions]])
 
     def mine(self):
         # if len(valid_transactions) > 0:
         magic_num = os.urandom(32).hex()
         # def __init__(self, prev_block, transactions, block_idx, magic_num=None):
-        new_block = Block(self.prev_block.block_idx, self.transactions, str(int(self.prev_block.block_idx) + 1), magic_num)
+        new_block = Block(self.prev_block.get_hash(), self.transactions, str(int(self.prev_block.block_idx) + 1), magic_num)
         if int(new_block.get_hash(), 16) & 0xFFFF == 0xCCCC:
             return new_block
         return False  # failed. maybe next time

@@ -72,7 +72,7 @@ class Transaction():
         return verifySignature(self.signature, body, self.public_key)
 
 
-    def verify(self, blockchain):
+    def verify(self, blockchain, outer_block=None):
         print("verifying block")
         if not self.txn_signature_verified():
             print("****SIGNATURE FAILED TO VERIFY****")
@@ -80,7 +80,7 @@ class Transaction():
         total_money = 0
 
         # TODO Make sure every value in inflows is unique
-
+        '''
         # Get Total amout Requested
         for inflow in self.inflows:
             for block in blockchain.blocks:
@@ -100,8 +100,31 @@ class Transaction():
         total_out = 0
         for outflow in self.outflows:
             total_out += outflow.coins
+        '''
+
+        total_out = sum(outflow.coins for outflow in self.outflows)
+
+        inflows = []
+        for block in blockchain.blocks:
+            if outer_block and block.block_idx == outer_block.block_idx:
+                break
+            for i in range(len(block.transactions)):
+                txn = block.transactions[i]
+                for outflow in txn.outflows:
+                    if outflow.recipient == self.public_key:
+                        inflows.append((InFlow(self.public_key, block.block_idx, i), outflow.coins))
+        for block in blockchain.blocks:
+            if outer_block and block.block_idx == outer_block.block_idx:
+                break
+            for i in range(len(block.transactions)):
+                txn = block.transactions[i]
+                for inflow in txn.inflows:
+                    for accounted in inflows:  # bad searching. oh well. blockchain is slow anyway
+                        if accounted[0].txn_idx == inflow.txn_idx and accounted[0].block_id == inflow.block_id:
+                            inflows.remove(accounted)
+        inflows, total_money = [f[0] for f in inflows], sum(b[1] for b in inflows)
 
         if total_money != total_out:
-            print("****MONEY AMOUNT DOES NOT MATCH****")
+            print("****MONEY AMOUNT DOES NOT MATCH (total: {}, out: {})****".format(total_money, total_out))
             return False
         return True

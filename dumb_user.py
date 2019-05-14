@@ -57,21 +57,21 @@ def main():
 
 def balance(blockchain, public_key):
     """Get all the money associated with a public key within a particular blockchain"""
-    total = 0
     inflows = []
     for block in blockchain.blocks:
         for i in range(len(block.transactions)):
             txn = block.transactions[i]
             for outflow in txn.outflows:
                 if outflow.recipient == public_key:
-                    inflows.append(InFlow(public_key, block.block_idx, i))
-                    total += outflow.coins
+                    inflows.append((InFlow(public_key, block.block_idx, i), outflow.coins))
+    for block in blockchain.blocks:
+        for i in range(len(block.transactions)):
+            txn = block.transactions[i]
             for inflow in txn.inflows:
                 for accounted in inflows:  # bad searching. oh well. blockchain is slow anyway
-                    if accounted.txn_id == inflow.txn_id:
+                    if accounted[0].txn_idx == inflow.txn_idx and accounted[0].block_id == inflow.block_id:
                         inflows.remove(accounted)
-                        total -= accounted.coins
-    return inflows, total
+    return [f[0] for f in inflows], sum(b[1] for b in inflows)
 
 # TODO all of these have the blockchain argument. maybe they belong
 # in the blockchain class
