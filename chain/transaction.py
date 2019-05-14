@@ -41,19 +41,19 @@ class Transaction():
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
         return Transaction(
-            inp["data"]["body"]["public_key"], 
-            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]], 
-            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]], 
+            inp["data"]["body"]["public_key"],
+            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]],
+            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]],
             inp["data"]["signature"]
         )
 
     def get_hash(self):
         data = {
             "signature": self.signature,
-            "body": { 
-                "public_key": self.public_key, 
-                "inflows": [inflow.serialize() for inflow in self.inflows], 
-                "outflows": [outflow.serialize() for outflow in self.outflows] 
+            "body": {
+                "public_key": self.public_key,
+                "inflows": [inflow.serialize() for inflow in self.inflows],
+                "outflows": [outflow.serialize() for outflow in self.outflows]
             }
         }
         return sha256( json.dumps( data ).encode("ascii") )
@@ -73,43 +73,45 @@ class Transaction():
 
     def double_spends(self, public_key, inflows):
         for i in BLOCKS:
-            #Check for every block
-            #Check for every block id in transaction
             if not(i.double_spends(public_key, inflows.get_blockId(), inflows.get_txnId())):
-                print("FALSE")
                 return False
         return True
 
 
-    def verify(self):
-        print("\n\n======= Transaction dump =======")
-        if self.txn_signature_verified():
-            print("Signature verified successfully!")
-        else:
+    def verify(self, block_chain):
+        if not self.txn_signature_verified():
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
+
+        # TODO Make sure every value in inflows is unique
         total_money = 0
 
-        # for i in range(len(self.inflows)):
-        #     if self.inflows[i].coins == -1:
-        #         print("***AN INFLOW TRANSACTION COULD NOT BE FOUND****")
-        #         return False
-        #         break
-        #     print("Inflow {} Transaction: Money: {}".format(i, self.inflows[i].coins))
-        #     total_money += self.inflows[i].coins
+        #Get Total amout Requested
+        for inflow in self.inflows:
+            for block in block_chain:
+                for txn in block.transactions:
+                    #Check for double spending
+                    for inflow_other in txn.inflows:
+                                self.block_id = block_id
+                                self.txn_id = txn_id
+                        if (inflow_other.owner == inflow.owner
+                            and inflow_other.block_id == inflow.block_id
+                            and inflow_other.txn_id == inflow.txn_id):
+                            print("*** DOUBLE SPENDING***")
+                            return False
+                    #Get Total Spent
+                    for outflow in txn.outflows:
+                        if outflow.recipient == inflow.owner:
+                            total_money += outflow.coins
 
-        #     # Check for Double Spending
-        #     if not (self.double_spends(self.get_public_key(), self.inflows[i])):
-        #         print("*** THIS TRANSACTION HAS DOUBLE SPENDING ***")
+        total_out = 0
+        for outflow in self.outflows:
+            total_out += outflow.coins
 
-        # print("Total money in: {}".format(total_money))
-        # total_out = 0
-
-        # for i in range(len(self.outflows)):
-        #     print("Outflow {} Transaction: Money {}".format(i, self.outflows[i].coins))
-        #     total_out += self.outflows[i].coins
-        # print("Total money out: {}".format(total_out))
-        # if total_money != total_out:
-        #     print("****MONEY AMOUNT DOES NOT MATCH****")
-        #     return False
+        if total_money != total_out:
+            print("****MONEY AMOUNT DOES NOT MATCH****")
+            return False
         return True
+
+if __name__ == '__main__':
+    main()

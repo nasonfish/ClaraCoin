@@ -10,7 +10,6 @@ class InFlow():
         self.block_id = block_id
         self.txn_id = txn_id
         self.txn = None
-        self.money = 0
 
     def get_block_id(self):
         return self.block_id
@@ -39,7 +38,7 @@ class OutFlow():
         if type(data) == str:
             data = json.loads(data)
         return OutFlow(data["number_of_coins"], data['recipient'])
-    
+
     '''Return true if there is a transaction in a block such that an inflow is
     coming from this outflow'''
     def is_spent(self):
