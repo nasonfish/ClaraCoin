@@ -9,7 +9,6 @@ class Transaction():
         self.outflows = outflows
         self.signature = signature
 
-
     def serialize(self):
         return { "hash": self.get_hash(),
                              "data": { "signature": self.signature,
@@ -18,7 +17,6 @@ class Transaction():
                                                   "outflows": [outflow.serialize() for outflow in self.outflows] }
                                        }
                             }
-
 
     @staticmethod
     def build_signed_txn(public_key, inflows, outflows, signing_key):
@@ -90,26 +88,26 @@ class Transaction():
             return False
         total_money = 0
 
-        # for i in range(len(self.inflows)):
-        #     if self.inflows[i].coins == -1:
-        #         print("***AN INFLOW TRANSACTION COULD NOT BE FOUND****")
-        #         return False
-        #         break
-        #     print("Inflow {} Transaction: Money: {}".format(i, self.inflows[i].coins))
-        #     total_money += self.inflows[i].coins
+        for i in range(len(self.inflows)):
+            if self.inflows[i].coins == -1:
+                print("***AN INFLOW TRANSACTION COULD NOT BE FOUND****")
+                return False
+                break
+            print("Inflow {} Transaction: Money: {}".format(i, self.inflows[i].coins))
+            total_money += self.inflows[i].coins
 
-        #     # Check for Double Spending
-        #     if not (self.double_spends(self.get_public_key(), self.inflows[i])):
-        #         print("*** THIS TRANSACTION HAS DOUBLE SPENDING ***")
+            # Check for Double Spending
+            if not (self.double_spends(self.get_public_key(), self.inflows[i])):
+                print("*** THIS TRANSACTION HAS DOUBLE SPENDING ***")
 
-        # print("Total money in: {}".format(total_money))
-        # total_out = 0
+        print("Total money in: {}".format(total_money))
+        total_out = 0
 
-        # for i in range(len(self.outflows)):
-        #     print("Outflow {} Transaction: Money {}".format(i, self.outflows[i].coins))
-        #     total_out += self.outflows[i].coins
-        # print("Total money out: {}".format(total_out))
-        # if total_money != total_out:
-        #     print("****MONEY AMOUNT DOES NOT MATCH****")
-        #     return False
+        for i in range(len(self.outflows)):
+            print("Outflow {} Transaction: Money {}".format(i, self.outflows[i].coins))
+            total_out += self.outflows[i].coins
+        print("Total money out: {}".format(total_out))
+        if total_money != total_out:
+            print("****MONEY AMOUNT DOES NOT MATCH****")
+            return False
         return True

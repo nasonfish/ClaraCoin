@@ -21,7 +21,6 @@ def verifySignature(signature, data, public_key):
         data = data.encode('ascii')
     if type(public_key) == str:
         public_key = bytes.fromhex(public_key)
-    print(public_key, signature, data)
     try:
         ed25519.Ed25519PublicKey.from_public_bytes(public_key).verify(signature, data)
         return True
