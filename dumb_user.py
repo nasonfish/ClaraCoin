@@ -2,6 +2,7 @@ from chain import Block, BlockChain, InFlow, OutFlow, Transaction
 from initial_user import getInitialUser
 import socket
 import time
+import json
 import threading
 from mine_network import *
 
@@ -14,7 +15,7 @@ PRIVATE_USER_ROOT = "1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81
 PUBLIC_USER_OTHER = "ee00e543db3b7b5508821b211151d7cea8187613f25bcf3037bbb38bfa7c4dc7"
 PRIVATE_USER_OTHER = "7ed318d6602e38caa1a519efb26662a2ad7aa133fbf13d4ed9d09dfc5b58f9b6"
 
-def userInterface():
+def main():
     #Check for valid public key
     while True:
         private_key = input("Enter your private key")
@@ -26,10 +27,10 @@ def userInterface():
             print("Please enter a valid private key")
             continue
 
-        user_public_key = input("Enter your private key")
+        user_public_key = input("Enter your public key")
         try:
             if(len(user_public_key) != 64):
-                raise (ValueError("Incorrect Length of Private key"))
+                raise (ValueError("Incorrect Length of public key"))
             int(user_public_key, 16)
         except:
             print("Please enter a valid private key")
@@ -51,10 +52,7 @@ def userInterface():
         except:
             print("Please enter a positive, whole number amount")
             continue
-    #Create transaction
-    inflows, outflows = balance(blockchain, user_public_key, recip_public_key, amount_spend)
-    txn = Transaction.build_signed_txn(user_public_key, inflows, outflows, private_key)
-    print(txn.serialize())
+    return user_public_key, user_private_key, recip_public_key, amount_spend
 
 
 def balance(blockchain, public_key):
@@ -136,7 +134,9 @@ if __name__ == '__main__':
     while blockchain is None:
         print("Waiting for valid blockchain...")
         time.sleep(5)
-    inflows, total = balance(blockchain, PUBLIC_USER_ROOT)
-    inflows, outflows = build_flows(blockchain, PUBLIC_USER_ROOT, PUBLIC_USER_OTHER, 5000)
-    txn = Transaction.build_signed_txn(PUBLIC_USER_ROOT, inflows, outflows, PRIVATE_USER_ROOT)
+    public, private, target, amount = main()
+    inflows, total = balance(blockchain, public)
+    inflows, outflows = build_flows(blockchain, public, target, amount)
+    txn = Transaction.build_signed_txn(public, inflows, outflows, private)
     shout(sock, txn)
+    print("Transaction submitted: {}".format(json.dumps(txn.serialize())))

@@ -75,5 +75,5 @@ class Person:
             nonce = os.urandom(32).hex()
             new_block = Block(prev_hash, nonce, valid_transactions)
             hsh = sha256( new_block.serialize() )
-            if int(hsh, 16) & 0xFFFF == 0x0:
+            if int(hsh, 16) & 0xFFFF == 0xCCCC:
                 success = True

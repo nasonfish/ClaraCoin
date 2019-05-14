@@ -39,10 +39,12 @@ def loop():
                 time.sleep(5)
                 continue
             next_block = blockchain.add_block(mine_block(proposal)) # blocks until mining successful or state change
+            if next_block is None:
+                continue
             print("block mined: {}".format(next_block.serialize()))
             for i in pack:
                 transactions.remove(i)  # these have been included already :)
-            sock.send(next_block.serialize().encode('ascii') + b'\n')
+            shout(sock, next_block)
         except MiningInturrupt:
             pass
 

@@ -11,9 +11,7 @@ class Block():
         self.prev_block = prev_block  # hex
         self.magic_num = magic_num
         self.transactions = transactions
-        print(type(self.transactions[0]))
         self.block_idx = block_idx
-        print(self.transactions)
         self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
     @staticmethod
@@ -107,6 +105,7 @@ class BlockChain:
             return
 
         self.blocks.append(block)
+        return block
 
     def get_tail(self):
         return self.blocks[-1]
@@ -156,7 +155,7 @@ class BlockProposal:
         magic_num = os.urandom(32).hex()
         # def __init__(self, prev_block, transactions, block_idx, magic_num=None):
         new_block = Block(self.prev_block.block_idx, self.transactions, str(int(self.prev_block.block_idx) + 1), magic_num)
-        if int(new_block.get_hash(), 16) & 0xFFFF == 0x0:
+        if int(new_block.get_hash(), 16) & 0xFFFF == 0xCCCC:
             return new_block
         return False  # failed. maybe next time
 

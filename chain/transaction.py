@@ -40,7 +40,6 @@ class Transaction():
         # self.outflows = []
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
-        print(inp)
         return Transaction(
             inp["data"]["body"]["public_key"], 
             [InFlow.load(l) for l in inp["data"]["body"]["inflows"]], 
