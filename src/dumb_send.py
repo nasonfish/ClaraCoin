@@ -6,7 +6,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 HOST = 'localhost'
 PORT = 1264
 
-data = input("Data to send? ")
+data = input()
 
 if __name__ == '__main__':
     sock.connect((HOST, PORT))

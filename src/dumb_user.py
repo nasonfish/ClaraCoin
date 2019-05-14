@@ -2,6 +2,7 @@ from chain import InFlow, OutFlow
 import socket
 import time
 import threading
+import sys
 from mine_network import *
 
 blockchain = None
@@ -135,7 +136,10 @@ if __name__ == '__main__':
         print("Waiting for valid blockchain...")
         time.sleep(5)
     while True:
-        public, private, target, amount = main()
+        try:
+            public, private, target, amount = main()
+        except EOFError:
+            sys.exit(0)
         inflows, total = balance(blockchain, public)
         inflows, outflows = build_flows(blockchain, public, target, amount)
         txn = Transaction.build_signed_txn(public, inflows, outflows, private)

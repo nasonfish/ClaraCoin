@@ -35,8 +35,6 @@ def loop():
             try:
                 proposal = blockchain.propose(*pack)
             except Exception as e:
-                import traceback
-                traceback.print_exc()
                 print("Waiting for transactions...")  # TODO invent new money as a transaction
                 time.sleep(5)
                 continue
@@ -64,14 +62,16 @@ def process_line(line):
     obj = recv(line)
     global blockchain
     if type(obj) is BlockChain:
-        print("recieved a blockchain")
+        print("Received a Blockchain, validating...")
         if not obj.verify():
-            print("bad blockchain")
+            print("Blockchain failed to validate!")
             return  # bad blockchain
-        print("good blockchain")
+        print("Blockchain validated successfully!")
         blockchain = obj
     elif type(obj) is Block:
-        pass
+        #if blockchain:
+        #    blockchain.add_block(obj)
+        pass  # TODO multiple miners
     elif type(obj) is Transaction:
         transactions.append(obj)
     elif type(obj) is Confirmation:
@@ -112,17 +112,6 @@ PORT = 1264
 
 def request_blockchain():
     shout(sock, BlockChainRequest())
-
-
-class TestBlockProposal:
-    def __init__(self):
-        pass
-
-    def mine(self):
-        return True
-
-    def serialize(self):
-        return json.dumps(['hello'])
 
 
 if __name__ == '__main__':

@@ -86,8 +86,6 @@ class BlockChain:
         try:
             block.verify(self)
         except:
-            import traceback
-            traceback.print_exc()
             print("Block doesn't verify; do not add to chain")
             return
 
@@ -115,7 +113,6 @@ class BlockChain:
         return [block.serialize() for block in self.blocks]
 
     def propose(self, *txns):
-        print("proposing transactions", txns)
         return BlockProposal(self, self.get_tail(), txns)
 
     @staticmethod
