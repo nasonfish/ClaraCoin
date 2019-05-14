@@ -1,5 +1,5 @@
 import json
-from util import sha256, sign, verify
+from util import sha256, sign, verifySignature
 from chain import InFlow, OutFlow
 
 class Transaction():
@@ -69,19 +69,11 @@ class Transaction():
 
     def txn_signature_verified(self):
         body = { "public_key": self.public_key, "inflows": [inflow.serialize() for inflow in self.inflows], "outflows": [outflow.serialize() for outflow in self.outflows] }
-        return verify(self.signature, body, self.public_key)
-
-    def double_spends(self, public_key, inflows):
-        for i in BLOCKS:
-            #Check for every block
-            #Check for every block id in transaction
-            if not(i.double_spends(public_key, inflows.get_blockId(), inflows.get_txnId())):
-                print("FALSE")
-                return False
-        return True
+        return verifySignature(self.signature, body, self.public_key)
 
 
-    def verify(self, block_chain):
+    def verify(self, blockchain):
+        print("verifying block")
         if not self.txn_signature_verified():
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
@@ -91,7 +83,7 @@ class Transaction():
 
         # Get Total amout Requested
         for inflow in self.inflows:
-            for block in block_chain:
+            for block in blockchain.blocks:
                 for txn in block.transactions:
                     # Check for double spending
                     for inflow_other in txn.inflows:

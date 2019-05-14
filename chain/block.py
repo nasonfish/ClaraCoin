@@ -75,8 +75,8 @@ class Block():
                 self.prev = i
                 return
 
-    def verify(self):
-        return True  # TODO
+    def verify(self, blockchain):
+        return False in [txn.verify(blockchain) for txn in self.transactions]
 
 class BlockChain:
     def __init__(self, blocks):
@@ -84,7 +84,7 @@ class BlockChain:
 
     def add_block(self, block):
         try:
-            block.verify()
+            block.verify(self)
         except:
             import traceback
             traceback.print_exc()
@@ -102,7 +102,7 @@ class BlockChain:
             # Verify transactions of a block
             if i > 0:
                 for txn in self.blocks[i+1].transactions:
-                    if not txn.verify():
+                    if not txn.verify(self):
                         return False
             # Check proof of work
             block_id = self.blocks[i].get_hash()
@@ -115,7 +115,7 @@ class BlockChain:
 
     def propose(self, *txns):
         print("proposing transactions", txns)
-        return BlockProposal(self.get_tail(), txns)
+        return BlockProposal(self, self.get_tail(), txns)
 
     @staticmethod
     def load(data):
@@ -124,11 +124,12 @@ class BlockChain:
         return BlockChain([Block.load(d) for d in data])
 
 class BlockProposal:
-    def __init__(self, prev_block, transactions):
+    def __init__(self, blockchain, prev_block, transactions):
+        self.blockchain = blockchain
         self.prev_block = prev_block
         self.transactions = []
         for txn in transactions:
-            if txn.verify():
+            if txn.verify(blockchain):
                 self.transactions.append(txn)
         # TODO add "invent money" functionality
         if len(self.transactions) == 0:
