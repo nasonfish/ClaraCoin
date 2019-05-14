@@ -82,9 +82,9 @@ class Transaction():
         if not self.txn_signature_verified():
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
+        total_money = 0
 
         # TODO Make sure every value in inflows is unique
-        total_money = 0
 
         #Get Total amout Requested
         for inflow in self.inflows:
@@ -92,11 +92,9 @@ class Transaction():
                 for txn in block.transactions:
                     #Check for double spending
                     for inflow_other in txn.inflows:
-                                self.block_id = block_id
-                                self.txn_id = txn_id
                         if (inflow_other.owner == inflow.owner
                             and inflow_other.block_id == inflow.block_id
-                            and inflow_other.txn_id == inflow.txn_id):
+                            and inflow_other.txn_idx == inflow.txn_idx):
                             print("*** DOUBLE SPENDING***")
                             return False
                     #Get Total Spent

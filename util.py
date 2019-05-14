@@ -12,7 +12,7 @@ def sha256(message):
     digest.update(message)
     return digest.finalize().hex()
 
-def verify(signature, data, public_key):
+def verifySignature(signature, data, public_key):
     if type(signature) == str:
         signature = bytes.fromhex(signature)
     if type(data) == dict:
@@ -21,7 +21,6 @@ def verify(signature, data, public_key):
         data = data.encode('ascii')
     if type(public_key) == str:
         public_key = bytes.fromhex(public_key)
-    print(public_key, signature, data)
     try:
         ed25519.Ed25519PublicKey.from_public_bytes(public_key).verify(signature, data)
         return True
@@ -61,4 +60,3 @@ if __name__ == '__main__':
         pass
         #print(i)
         i.verify()
-

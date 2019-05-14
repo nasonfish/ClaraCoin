@@ -40,17 +40,7 @@ class Block():
                 return
 
 
-    def check_double_spending(self, public_key, block_id, txn_id):
-        #Go through each txn in block
-        for txn in self.transactions:
-            #check to see if input public key matches
-            if (txn.get_public_key() == public_key):
-                # Check every inflow of in public key matches
-                for inflow in txn.inflows:
-                    #If block id and txn id match, then the block double spends
-                    if(block_id == inflow.get_blockId() and txn_id == inflow.get_txnId()):
-                        return False
-        return True
+
 
     def serialize(self):
         return json.dumps([self.hash, self.prev_block.hash, self.magic_num, self.block_height, self.merkleroot, [txn.serialize for txn in self.transactions]])
