@@ -12,7 +12,7 @@ def sha256(message):
     digest.update(message)
     return digest.finalize().hex()
 
-def verify(signature, data, public_key):
+def verifySignature(signature, data, public_key):
     if type(signature) == str:
         signature = bytes.fromhex(signature)
     if type(data) == dict:
@@ -61,4 +61,3 @@ if __name__ == '__main__':
         pass
         #print(i)
         i.verify()
-

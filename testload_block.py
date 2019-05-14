@@ -9,4 +9,7 @@ with open("Blocks_updated/block0.json", 'rb') as f:
     block = Block.load( f_bytes.decode( "ascii" ))
     print( json.dumps(block.serialize()) )
     # block = Block(obj_dict["prev_block"], [ Transaction.load( txn ) for txn in obj_dict["transactions"] ], obj_dict["block_idx"], obj_dict["magic_num"], obj_dict["merkleroot"])
-    # print(block)
+    # print(block
+    for txn in block.transactions:
+        print(txn.verify())
+    # print(block.verify())

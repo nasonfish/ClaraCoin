@@ -2,21 +2,20 @@
 import json
 import os
 from cryptography.exceptions import InvalidSignature
-from util import sha256, verify
+from util import sha256, verifySignature
 
 class InFlow():
     def __init__(self, owner, block_id, txn_id):
         self.owner = owner
         self.block_id = block_id
-        self.txn_id = txn_id
-        self.txn = None
+        self.txn_idx = txn_idx
         self.money = 0
 
     def get_block_id(self):
         return self.block_id
 
     def get_txn_id(self):
-        return self.txn_id
+        return self.txn_idx
 
     @staticmethod
     def load(data):
@@ -25,21 +24,20 @@ class InFlow():
         return InFlow(data["owner"], data['block_id'], data['txn_id'])
 
     def serialize(self):
-        return {'owner': self.owner, 'block_id': self.block_id, 'txn_id': self.txn_id}
+        return {'owner': self.owner, 'block_id': self.block_id, 'txn_idx': self.txn_idx}
 
 class OutFlow():
     def __init__(self, coins, recipient):
         self.coins = coins
         self.recipient = recipient
-        self.block_id = None
-        self.txn_idx = None
+
 
     @staticmethod
     def load(data):
         if type(data) == str:
             data = json.loads(data)
         return OutFlow(data["number_of_coins"], data['recipient'])
-    
+
     '''Return true if there is a transaction in a block such that an inflow is
     coming from this outflow'''
     def is_spent(self):

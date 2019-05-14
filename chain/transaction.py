@@ -1,5 +1,5 @@
 import json
-from util import sha256, sign, verify
+from util import sha256, sign, verifySignature
 from chain import InFlow, OutFlow
 
 class Transaction():
@@ -41,19 +41,19 @@ class Transaction():
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
         return Transaction(
-            inp["data"]["body"]["public_key"], 
-            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]], 
-            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]], 
+            inp["data"]["body"]["public_key"],
+            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]],
+            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]],
             inp["data"]["signature"]
         )
 
     def get_hash(self):
         data = {
             "signature": self.signature,
-            "body": { 
-                "public_key": self.public_key, 
-                "inflows": [inflow.serialize() for inflow in self.inflows], 
-                "outflows": [outflow.serialize() for outflow in self.outflows] 
+            "body": {
+                "public_key": self.public_key,
+                "inflows": [inflow.serialize() for inflow in self.inflows],
+                "outflows": [outflow.serialize() for outflow in self.outflows]
             }
         }
         return sha256( json.dumps( data ).encode("ascii") )
@@ -69,7 +69,7 @@ class Transaction():
 
     def txn_signature_verified(self):
         body = { "public_key": self.public_key, "inflows": [inflow.serialize() for inflow in self.inflows], "outflows": [outflow.serialize() for outflow in self.outflows] }
-        return verify(self.signature, body, self.public_key)
+        return verifySignature(self.signature, body, self.public_key)
 
     def double_spends(self, public_key, inflows):
         for i in BLOCKS:
