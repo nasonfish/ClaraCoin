@@ -96,11 +96,11 @@ def process_line(line):
     obj = recv(line)
     global blockchain
     if type(obj) is BlockChain:
-        print("recieved a blockchain")
+        print("Received a Blockchain; validating...")
         if not obj.verify():
-            print("bad blockchain")
+            print("Blockchain failed to validate!")
             return  # bad blockchain
-        print("good blockchain")
+        print("Blockchain validated successfully!")
         blockchain = obj
 
 

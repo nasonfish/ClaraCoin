@@ -77,7 +77,6 @@ class Transaction():
         if not self.txn_signature_verified():
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
-        total_money = 0
 
         # TODO Make sure every value in inflows is unique
         '''
