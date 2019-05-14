@@ -19,8 +19,10 @@ blockchain = None
 
 transactions = []
 
+
 class MiningInturrupt(Exception):
     pass
+
 
 def loop():
     while blockchain is None:
@@ -38,7 +40,7 @@ def loop():
                 print("Waiting for transactions...")  # TODO invent new money as a transaction
                 time.sleep(5)
                 continue
-            next_block = blockchain.add_block(mine_block(proposal)) # blocks until mining successful or state change
+            next_block = blockchain.add_block(mine_block(proposal))  # blocks until mining successful or state change
             if next_block is None:
                 continue
             print("block mined: {}".format(next_block.serialize()))
@@ -48,12 +50,14 @@ def loop():
         except MiningInturrupt:
             pass
 
+
 def mine_block(block_proposal):
     while task is TASK_MINING:
-        success = block_proposal.mine() # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
+        success = block_proposal.mine()  # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
         if success:
             return success
     raise MiningInturrupt()
+
 
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
@@ -78,6 +82,7 @@ def process_line(line):
     else:
         pass  # ignore?
 
+
 class Client(threading.Thread):
     def __init__(self, sock):
         threading.Thread.__init__(self)
@@ -100,6 +105,7 @@ class Client(threading.Thread):
                 else:
                     packet = lines[-1].encode('ascii')
 
+
 HOST = 'localhost'
 PORT = 1264
 
@@ -107,11 +113,14 @@ PORT = 1264
 def request_blockchain():
     shout(sock, BlockChainRequest())
 
+
 class TestBlockProposal:
     def __init__(self):
         pass
+
     def mine(self):
         return True
+
     def serialize(self):
         return json.dumps(['hello'])
 

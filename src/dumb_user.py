@@ -1,58 +1,53 @@
-from chain import Block, BlockChain, InFlow, OutFlow, Transaction
-from initial_user import getInitialUser
+from chain import InFlow, OutFlow
 import socket
 import time
-import json
 import threading
 from mine_network import *
 
 blockchain = None
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-PUBLIC_USER_ROOT = "75efa6f1fdf1393a5ea815b2b3690293d079df187944f22ec79f3380ef7bd743"
-PRIVATE_USER_ROOT = "1d82897e5881368cac9eb99126cdfca1e0317629dbeaa7280484c5dae81e932b"
-
-PUBLIC_USER_OTHER = "ee00e543db3b7b5508821b211151d7cea8187613f25bcf3037bbb38bfa7c4dc7"
-PRIVATE_USER_OTHER = "7ed318d6602e38caa1a519efb26662a2ad7aa133fbf13d4ed9d09dfc5b58f9b6"
 
 def main():
-    #Check for valid public key
-    while True:
-        private_key = input("Enter your private key")
-        # try:
-        #     if(len(private_key) != 64):
-        #         raise (ValueError("Incorrect Length of Private key"))
-        #     int(private_key, 16)
-        # except:
-        #     print("Please enter a valid private key")
-        #     continue
+    private_key = input("Enter your private key: ")
+    print()
+    # try:
+    #     if(len(private_key) != 64):
+    #         raise (ValueError("Incorrect Length of Private key"))
+    #     int(private_key, 16)
+    # except:
+    #     print("Please enter a valid private key")
+    #     continue
 
-        user_public_key = input("Enter your public key")
-        # try:
-        #     if(len(user_public_key) != 64):
-        #         raise (ValueError("Incorrect Length of public key"))
-        #     int(user_public_key, 16)
-        # except:
-        #     print("Please enter a valid private key")
-        #     continue
+    user_public_key = input("Enter your public key: ")
+    print()
+    # try:
+    #     if(len(user_public_key) != 64):
+    #         raise (ValueError("Incorrect Length of public key"))
+    #     int(user_public_key, 16)
+    # except:
+    #     print("Please enter a valid private key")
+    #     continue
 
-        recip_public_key = input("Enter public key of Recipient")
-        # try:
-        #     if(len(recip_private_key) != 64):
-        #         raise (ValueError("Incorrect Length of Recip key"))
-        #     int(recip_private_key, 16)
-        # except:
-        #     print("Please enter a valid public key")
-        #     continue
-        amount_spend = input("Enter amount of Clara Coin to be transfered")
-        # try:
-        #     if (amount_spend != str(int(amount_spend)) and amount_spend < 1):
-        #         raise (ValueError("Entered value isn't positive whole number"))
-        #     break
-        # except:
-        #     print("Please enter a positive, whole number amount")
-        #     continue
-        return user_public_key, private_key, recip_public_key, int(amount_spend)
+    recip_public_key = input("Enter public key of recipient: ")
+    print()
+    # try:
+    #     if(len(recip_private_key) != 64):
+    #         raise (ValueError("Incorrect Length of Recip key"))
+    #     int(recip_private_key, 16)
+    # except:
+    #     print("Please enter a valid public key")
+    #     continue
+    amount_spend = input("Enter amount of ClaraCoin to be transferred: ")
+    print()
+    # try:
+    #     if (amount_spend != str(int(amount_spend)) and amount_spend < 1):
+    #         raise (ValueError("Entered value isn't positive whole number"))
+    #     break
+    # except:
+    #     print("Please enter a positive, whole number amount")
+    #     continue
+    return user_public_key, private_key, recip_public_key, int(amount_spend)
 
 
 def balance(blockchain, public_key):
@@ -73,6 +68,7 @@ def balance(blockchain, public_key):
                         inflows.remove(accounted)
     return [f[0] for f in inflows], sum(b[1] for b in inflows)
 
+
 # TODO all of these have the blockchain argument. maybe they belong
 # in the blockchain class
 def build_flows(blockchain, from_public, to_public, amount):
@@ -81,15 +77,18 @@ def build_flows(blockchain, from_public, to_public, amount):
     if total < amount:
         raise Exception("You can't send more money than you own.")
     if total > amount:
-        outflows.append(OutFlow(total-amount, from_public)) # send to self
-    outflows.append(OutFlow(amount, to_public)) # send to target
+        outflows.append(OutFlow(total - amount, from_public))  # send to self
+    outflows.append(OutFlow(amount, to_public))  # send to target
     return inflows, outflows
+
 
 HOST = 'localhost'
 PORT = 1264
 
+
 def request_blockchain():
     shout(sock, BlockChainRequest())
+
 
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
@@ -102,6 +101,7 @@ def process_line(line):
             return  # bad blockchain
         print("good blockchain")
         blockchain = obj
+
 
 class Client(threading.Thread):
     def __init__(self, sock):
@@ -134,9 +134,10 @@ if __name__ == '__main__':
     while blockchain is None:
         print("Waiting for valid blockchain...")
         time.sleep(5)
-    public, private, target, amount = main()
-    inflows, total = balance(blockchain, public)
-    inflows, outflows = build_flows(blockchain, public, target, amount)
-    txn = Transaction.build_signed_txn(public, inflows, outflows, private)
-    shout(sock, txn)
-    print("Transaction submitted: {}".format(json.dumps(txn.serialize())))
+    while True:
+        public, private, target, amount = main()
+        inflows, total = balance(blockchain, public)
+        inflows, outflows = build_flows(blockchain, public, target, amount)
+        txn = Transaction.build_signed_txn(public, inflows, outflows, private)
+        shout(sock, txn)
+        print("Transaction submitted: {}".format(json.dumps(txn.serialize())))
