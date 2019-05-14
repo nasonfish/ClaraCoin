@@ -41,19 +41,19 @@ class Transaction():
         # for i in self.txn[1][2]:
         #    self.outflows.append(OutFlow(*i))
         return Transaction(
-            inp["data"]["body"]["public_key"],
-            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]],
-            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]],
+            inp["data"]["body"]["public_key"], 
+            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]], 
+            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]], 
             inp["data"]["signature"]
         )
 
     def get_hash(self):
         data = {
             "signature": self.signature,
-            "body": {
-                "public_key": self.public_key,
-                "inflows": [inflow.serialize() for inflow in self.inflows],
-                "outflows": [outflow.serialize() for outflow in self.outflows]
+            "body": { 
+                "public_key": self.public_key, 
+                "inflows": [inflow.serialize() for inflow in self.inflows], 
+                "outflows": [outflow.serialize() for outflow in self.outflows] 
             }
         }
         return sha256( json.dumps( data ).encode("ascii") )
@@ -73,13 +73,19 @@ class Transaction():
 
     def double_spends(self, public_key, inflows):
         for i in BLOCKS:
+            #Check for every block
+            #Check for every block id in transaction
             if not(i.double_spends(public_key, inflows.get_blockId(), inflows.get_txnId())):
+                print("FALSE")
                 return False
         return True
 
 
     def verify(self, block_chain):
-        if not self.txn_signature_verified():
+        print("\n\n======= Transaction dump =======")
+        if self.txn_signature_verified():
+            print("Signature verified successfully!")
+        else:
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
         total_money = 0
@@ -110,6 +116,3 @@ class Transaction():
             print("****MONEY AMOUNT DOES NOT MATCH****")
             return False
         return True
-
-if __name__ == '__main__':
-    main()
