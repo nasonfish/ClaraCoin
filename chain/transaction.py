@@ -82,28 +82,25 @@ class Transaction():
 
 
     def verify(self, block_chain):
-        print("\n\n======= Transaction dump =======")
-        if self.txn_signature_verified():
-            print("Signature verified successfully!")
-        else:
+        if not self.txn_signature_verified():
             print("****SIGNATURE FAILED TO VERIFY****")
             return False
         total_money = 0
 
         # TODO Make sure every value in inflows is unique
 
-        #Get Total amout Requested
+        # Get Total amout Requested
         for inflow in self.inflows:
             for block in block_chain:
                 for txn in block.transactions:
-                    #Check for double spending
+                    # Check for double spending
                     for inflow_other in txn.inflows:
                         if (inflow_other.owner == inflow.owner
-                            and inflow_other.block_id == inflow.block_id
-                            and inflow_other.txn_idx == inflow.txn_idx):
+                                and inflow_other.block_id == inflow.block_id
+                                and inflow_other.txn_idx == inflow.txn_idx):
                             print("*** DOUBLE SPENDING***")
                             return False
-                    #Get Total Spent
+                    # Get Total Spent
                     for outflow in txn.outflows:
                         if outflow.recipient == inflow.owner:
                             total_money += outflow.coins
