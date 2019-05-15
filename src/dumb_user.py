@@ -9,7 +9,7 @@ blockchain = None
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-def main():
+def main(blockchain):
     private_key = input("Enter your private key: ")
     print()
     # try:
@@ -104,7 +104,8 @@ def process_line(line):
             return  # bad blockchain
         print("Blockchain validated successfully!")
         blockchain = obj
-
+    if type(obj) is Block:
+        request_blockchain()
 
 class Client(threading.Thread):
     def __init__(self, sock):
@@ -131,7 +132,6 @@ class Client(threading.Thread):
 
 if __name__ == '__main__':
     sock.connect((HOST, PORT))
-
     Client(sock).start()
     request_blockchain()
     while True:
@@ -139,7 +139,7 @@ if __name__ == '__main__':
             print("Waiting for valid blockchain...")
             time.sleep(5)
         try:
-            public, private, target, amount = main()
+            public, private, target, amount = main(blockchain)
         except EOFError:
             sys.exit(0)
         inflows, total = balance(blockchain, public)
