@@ -34,7 +34,7 @@ def loop():
             pack = tuple(transactions)
             try:
                 proposal = blockchain.propose(*pack)
-            except Exception as e:
+            except Exception as e: # No transactions were valid
                 print("Waiting for transactions...")  # TODO invent new money as a transaction
                 time.sleep(5)
                 continue
@@ -50,6 +50,7 @@ def loop():
 
 
 def mine_block(block_proposal):
+    print("Mining block...")
     while task is TASK_MINING:
         success = block_proposal.mine()  # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
         if success:

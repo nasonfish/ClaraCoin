@@ -6,12 +6,10 @@ from chain import Transaction
 
 class Block():
     def __init__(self, prev_block, transactions, block_idx, magic_num=None):
-        if type(prev_block) == int:
-            prev_block = str(prev_block)
         self.prev_block = prev_block  # hex
-        self.magic_num = magic_num
+        self.magic_num = magic_num # hex
         self.transactions = transactions
-        self.block_idx = block_idx
+        self.block_idx = block_idx # int
         self.merkleroot = self.merkle([ txn.get_hash() for txn in self.transactions ])
 
     @staticmethod
@@ -22,31 +20,14 @@ class Block():
 
     def serialize(self):
         return { "hash": self.get_hash(),
-                             "prev_block": self.prev_block,
-                             "magic_num": self.magic_num,
-                             "merkleroot": self.merkleroot,
-                             "transactions": [txn.serialize() for txn in self.transactions],
-                             "block_idx": self.block_idx }
+                 "prev_block": self.prev_block,
+                 "magic_num": self.magic_num,
+                 "merkleroot": self.merkleroot,
+                 "transactions": [ txn.serialize() for txn in self.transactions ],
+                 "block_idx": self.block_idx }
 
     def get_hash(self):
-        if self.prev_block == "0":
-            prev_hex = b"0"
-        else:
-            prev_hex = bytes.fromhex(self.prev_block)
-        return sha256( prev_hex + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
-
-    def set_magic_num(self, magic_num):
-        self.magic_num = magic_num
-
-    def set_prev(self, blocks):
-        if self.prev_block == 0:
-            self.prev = None
-            return
-        for i in blocks:
-            if i.hash == self.prev_block:
-                self.prev = i
-                return
-
+        return sha256( bytes.fromhex(self.prev_block) + bytes.fromhex(self.magic_num) + bytes.fromhex(self.merkleroot) )
 
     def merkle( self, hashlist ):
         if len(hashlist) == 0:
@@ -61,22 +42,15 @@ class Block():
                 hashlist.append( sha256( hashlist[-1] + hashlist[-1] ) )
             return self.merkle( new_hashlist )
 
+    # TODO this method is to used for pruning transactions in the block
     def prune(self):
         for i in range(len(self.transactions)):
             if self.transactions[i].is_spent():
                 self.transactions[i] = None
 
-    def set_prev(self, blocks):
-        if self.prev_block == 0:
-            self.prev = None
-            return
-        for i in blocks:
-            if i.hash == self.prev_block:
-                self.prev = i
-                return
-
+    '''Validates the block, which means validating each transaction in the block'''
     def verify(self, blockchain):
-        return False in [txn.verify(blockchain, self) for txn in self.transactions]
+        return False in [ txn.verify( blockchain, self ) for txn in self.transactions ]
 
 class BlockChain:
     def __init__(self, blocks):
@@ -96,7 +70,6 @@ class BlockChain:
         return self.blocks[-1]
 
     def verify(self):
-
         for i in range( len(self.blocks)-1 ):
             # Verify transactions of a block
             if i > 0:
@@ -124,7 +97,7 @@ class BlockChain:
 class BlockProposal:
     def __init__(self, blockchain, prev_block, transactions):
         self.blockchain = blockchain
-        self.prev_block = prev_block
+        self.prev_block = prev_block # TODO instead of passing in block object, block id should be enough
         self.transactions = []
         for txn in transactions:
             if txn.verify(blockchain, None):
@@ -133,15 +106,17 @@ class BlockProposal:
         if len(self.transactions) == 0:
             raise Exception("Cannot propose an empty block.")
 
+    # TODO why is it serialized as a list rather than as a dictionairy?
     def serialize(self):
-        return json.dumps([self.magic_num, self.prev_block.get_hash(), [txn.serialize for txn in self.transactions]])
+        return json.dumps( [ self.magic_num, self.prev_block.get_hash(), [ txn.serialize for txn in self.transactions ] ] )
 
     def mine(self):
         # if len(valid_transactions) > 0:
         magic_num = os.urandom(32).hex()
+        print("Magic number attempted: %s" % (magic_num) )
         # def __init__(self, prev_block, transactions, block_idx, magic_num=None):
-        new_block = Block(self.prev_block.get_hash(), self.transactions, str(int(self.prev_block.block_idx) + 1), magic_num)
-        if int(new_block.get_hash(), 16) & 0xFFFF == 0xCCCC:
+        new_block = Block( self.prev_block.get_hash(), self.transactions, str( int(self.prev_block.block_idx) + 1 ), magic_num )
+        if int( new_block.get_hash(), 16 ) & 0xFFFF == 0xCCCC:
             return new_block
         return False  # failed. maybe next time
 

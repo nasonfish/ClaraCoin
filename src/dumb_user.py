@@ -140,6 +140,7 @@ if __name__ == '__main__':
             public, private, target, amount = main()
         except EOFError:
             sys.exit(0)
+        print("transaction data", public, private, target, amount)
         inflows, total = balance(blockchain, public)
         inflows, outflows = build_flows(blockchain, public, target, amount)
         txn = Transaction.build_signed_txn(public, inflows, outflows, private)
