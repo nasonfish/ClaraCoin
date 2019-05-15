@@ -12,72 +12,62 @@ class Transaction():
 
     def serialize(self):
         return { "hash": self.get_hash(),
-                             "data": { "signature": self.signature,
-                                        "body": { "public_key": self.public_key,
-                                                  "inflows": [inflow.serialize() for inflow in self.inflows],
-                                                  "outflows": [outflow.serialize() for outflow in self.outflows] }
-                                       }
-                            }
-
+                 "data": { "signature": self.signature,
+                           "body": { "public_key": self.public_key,
+                                     "inflows": [ inflow.serialize() for inflow in self.inflows ],
+                                     "outflows": [ outflow.serialize() for outflow in self.outflows ]
+                                   }
+                         }
+                }
 
     @staticmethod
     def build_signed_txn(public_key, inflows, outflows, signing_key):
-        body = { "public_key": public_key, "inflows": [inflow.serialize() for inflow in inflows], "outflows": [outflow.serialize() for outflow in outflows] }
-        signature = sign(json.dumps(body), signing_key)
-        return Transaction(public_key, inflows, outflows, signature)
+        body = { "public_key": public_key, "inflows": [ inflow.serialize() for inflow in inflows ], "outflows": [ outflow.serialize() for outflow in outflows ] }
+        signature = sign( json.dumps(body), signing_key )
+        return Transaction( public_key, inflows, outflows, signature )
 
     @staticmethod
-    def load(inp):
-        if type(inp) == str:
-            inp = json.loads(inp)
-        # self.public_key = obj_dict["data"]["body"]["public_key"]
-        # self.inflows = obj_dict["data"]["body"]["inflows"]
-        # self.outflows = obj_dict["data"]["body"]["outflows"]
+    def load(obj):
+        if type(obj) == str:
+            obj = json.loads(obj)
 
-        # self.inflows = []
-        # for i in self.txn[1][1]:
-        #    self.inflows.append(InFlow(self.get_public_key(), *i))
-        # self.outflows = []
-        # for i in self.txn[1][2]:
-        #    self.outflows.append(OutFlow(*i))
-        return Transaction(
-            inp["data"]["body"]["public_key"], 
-            [InFlow.load(l) for l in inp["data"]["body"]["inflows"]], 
-            [OutFlow.load(l) for l in inp["data"]["body"]["outflows"]], 
-            inp["data"]["signature"]
+        return Transaction( obj["data"]["body"]["public_key"],
+                            [ InFlow.load(l) for l in obj["data"]["body"]["inflows"] ],
+                            [ OutFlow.load(l) for l in obj["data"]["body"]["outflows"] ],
+                            obj["data"]["signature"]
         )
 
     def get_hash(self):
-        data = {
-            "signature": self.signature,
-            "body": { 
-                "public_key": self.public_key, 
-                "inflows": [inflow.serialize() for inflow in self.inflows], 
-                "outflows": [outflow.serialize() for outflow in self.outflows] 
-            }
+        data = { "signature": self.signature,
+                 "body": {
+                     "public_key": self.public_key,
+                     "inflows": [ inflow.serialize() for inflow in self.inflows ],
+                     "outflows": [ outflow.serialize() for outflow in self.outflows ]
+                 }
         }
         return sha256( json.dumps( data ).encode("ascii") )
 
+    # TODO this method is to be used for pruning transactions
     def is_spent(self, blockchain):
-        # for each outflow in this transaction, go through all blocks that were
-        # mined later than that which this transaction is included in, and
-        # see if there is an inflow pointing back to the outflow
         for outflow in self.outflow:
             if not outflow.is_spent():
                 return False
         return True
 
     def txn_signature_verified(self):
-        body = { "public_key": self.public_key, "inflows": [inflow.serialize() for inflow in self.inflows], "outflows": [outflow.serialize() for outflow in self.outflows] }
-        return verifySignature(self.signature, body, self.public_key)
+        body = { "public_key": self.public_key, "inflows": [ inflow.serialize() for inflow in self.inflows ], "outflows": [ outflow.serialize() for outflow in self.outflows ] }
+        return verifySignature( self.signature, body, self.public_key )
 
-
+    # TODO clean this up
+    '''Validates the transaction, which means checking for three things:
+            i) transaction signature verifies
+            ii) no double spending occurs; every inflow refers to an unspent outflow in the chain
+            iii) total incoming amount equals total outgoing amount'''
     def verify(self, blockchain, outer_block=None):
-        print("verifying block")
+        print("Validating transaction...")
         if not self.txn_signature_verified():
-            print("****SIGNATURE FAILED TO VERIFY****")
+            print("Transaction signature failed to verify")
             return False
-        total_money = 0
 
         # TODO Make sure every value in inflows is unique
         '''

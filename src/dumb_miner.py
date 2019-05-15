@@ -19,8 +19,10 @@ blockchain = None
 
 transactions = []
 
+
 class MiningInturrupt(Exception):
     pass
+
 
 def loop():
     while blockchain is None:
@@ -32,42 +34,45 @@ def loop():
             pack = tuple(transactions)
             try:
                 proposal = blockchain.propose(*pack)
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
+            except Exception as e: # No transactions were valid
                 print("Waiting for transactions...")  # TODO invent new money as a transaction
                 time.sleep(5)
                 continue
-            next_block = blockchain.add_block(mine_block(proposal)) # blocks until mining successful or state change
+            next_block = blockchain.add_block(mine_block(proposal))  # blocks until mining successful or state change
             if next_block is None:
                 continue
-            print("block mined: {}".format(next_block.serialize()))
+            print("Block mined: {}".format(next_block.serialize()))
             for i in pack:
                 transactions.remove(i)  # these have been included already :)
             shout(sock, next_block)
         except MiningInturrupt:
             pass
 
+
 def mine_block(block_proposal):
+    print("Mining block...")
     while task is TASK_MINING:
-        success = block_proposal.mine() # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
+        success = block_proposal.mine()  # will return true if successfully mined. this might be inefficient since we check our task so often (between every hash).
         if success:
             return success
     raise MiningInturrupt()
+
 
 def process_line(line):
     """Threaded: when a block is recieved, verify it here, and then change task accordingly"""
     obj = recv(line)
     global blockchain
     if type(obj) is BlockChain:
-        print("recieved a blockchain")
+        print("Received a Blockchain, validating...")
         if not obj.verify():
-            print("bad blockchain")
+            print("Blockchain failed to validate!")
             return  # bad blockchain
-        print("good blockchain")
+        print("Blockchain validated successfully!")
         blockchain = obj
     elif type(obj) is Block:
-        pass
+        #if blockchain:
+        #    blockchain.add_block(obj)
+        pass  # TODO multiple miners
     elif type(obj) is Transaction:
         transactions.append(obj)
     elif type(obj) is Confirmation:
@@ -77,6 +82,7 @@ def process_line(line):
             shout(sock, blockchain)
     else:
         pass  # ignore?
+
 
 class Client(threading.Thread):
     def __init__(self, sock):
@@ -100,20 +106,13 @@ class Client(threading.Thread):
                 else:
                     packet = lines[-1].encode('ascii')
 
+
 HOST = 'localhost'
 PORT = 1264
 
 
 def request_blockchain():
     shout(sock, BlockChainRequest())
-
-class TestBlockProposal:
-    def __init__(self):
-        pass
-    def mine(self):
-        return True
-    def serialize(self):
-        return json.dumps(['hello'])
 
 
 if __name__ == '__main__':

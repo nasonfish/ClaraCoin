@@ -1,8 +1,5 @@
-#!/usr/bin/env python3
 import json
-import os
-from cryptography.exceptions import InvalidSignature
-from util import sha256, verifySignature
+
 
 class InFlow():
     def __init__(self, owner, block_id, txn_idx):
@@ -26,6 +23,7 @@ class InFlow():
 
     def serialize(self):
         return {'owner': self.owner, 'block_id': self.block_id, 'txn_idx': self.txn_idx}
+
 
 class OutFlow():
     def __init__(self, coins, recipient):

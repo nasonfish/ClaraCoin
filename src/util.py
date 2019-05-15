@@ -12,6 +12,7 @@ def sha256(message):
     digest.update(message)
     return digest.finalize().hex()
 
+
 def verifySignature(signature, data, public_key):
     if type(signature) == str:
         signature = bytes.fromhex(signature)
@@ -27,36 +28,8 @@ def verifySignature(signature, data, public_key):
     except InvalidSignature:
         return False
 
+
 def sign(data, private_key):
     pri_bytes = bytes.fromhex(private_key)
     key = ed25519.Ed25519PrivateKey.from_private_bytes(pri_bytes)
     return key.sign(data.encode('ascii')).hex()
-
-def printTxn( signed_txn ):
-	print( "  Signature: %s" % signed_txn[ 0 ] )
-	txn = signed_txn[ 1 ]
-	print( "  Public key: %s" % txn[ 0 ] )
-	print( "  In-flows:" )
-	for flow in txn[ 1 ]:
-		print( "	Block ID: %s" % flow[ 0 ] )
-		print( "	Txn idx: %d" % flow[ 1 ] )
-	print( "  Out-flows:" )
-	for flow in txn[ 2 ]:
-		print( "	Coins: %d" % flow[ 0 ] )
-		print( "	Recipient public key: %s" % flow[ 1 ] )
-
-
-if __name__ == '__main__':
-    """TESTS / Our homework assignment."""
-    BLOCK_FILES = ['Blocks/block0', 'Blocks/block2398', 'Blocks/block1530', 'Blocks/block3312', 'Blocks/block7123']
-    for filename in BLOCK_FILES:
-        BLOCKS.append( Block.load(filename) )
-    for block in BLOCKS:
-        block.set_prev(BLOCKS)
-
-    transaction_names = ['Transactions/txn2','Transactions/txn4', 'Transactions/txn1', 'Transactions/txn3', 'Transactions/txn5']
-    transactions = [Transaction(f_name=name) for name in transaction_names]
-    for i in transactions:
-        pass
-        #print(i)
-        i.verify()
