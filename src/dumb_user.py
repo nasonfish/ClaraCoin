@@ -146,3 +146,4 @@ if __name__ == '__main__':
     txn = Transaction.build_signed_txn(public, inflows, outflows, private)
     shout(sock, txn)
     print("Transaction submitted: {}".format(json.dumps(txn.serialize())))
+    sys.exit(0)
