@@ -29,6 +29,8 @@ def main():
     # except:
     #     print("Please enter a valid private key")
     #     continue
+    inflows, bal = balance(blockchain, user_public_key)
+    print("Your current balance is {}".format(bal))
 
     recip_public_key = input("Enter public key of recipient: ")
     print()
@@ -83,7 +85,7 @@ def build_flows(blockchain, from_public, to_public, amount):
     return inflows, outflows
 
 
-HOST = 'localhost'
+HOST = 'nasonfish.com'
 PORT = 1264
 
 
@@ -140,7 +142,6 @@ if __name__ == '__main__':
             public, private, target, amount = main()
         except EOFError:
             sys.exit(0)
-        print("transaction data", public, private, target, amount)
         inflows, total = balance(blockchain, public)
         inflows, outflows = build_flows(blockchain, public, target, amount)
         txn = Transaction.build_signed_txn(public, inflows, outflows, private)
