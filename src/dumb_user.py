@@ -137,13 +137,12 @@ if __name__ == '__main__':
     while blockchain is None:
         print("Waiting for valid blockchain...")
         time.sleep(5)
-    while True:
-        try:
-            public, private, target, amount = main()
-        except EOFError:
-            sys.exit(0)
-        inflows, total = balance(blockchain, public)
-        inflows, outflows = build_flows(blockchain, public, target, amount)
-        txn = Transaction.build_signed_txn(public, inflows, outflows, private)
-        shout(sock, txn)
-        print("Transaction submitted: {}".format(json.dumps(txn.serialize())))
+    try:
+        public, private, target, amount = main()
+    except EOFError:
+        sys.exit(0)
+    inflows, total = balance(blockchain, public)
+    inflows, outflows = build_flows(blockchain, public, target, amount)
+    txn = Transaction.build_signed_txn(public, inflows, outflows, private)
+    shout(sock, txn)
+    print("Transaction submitted: {}".format(json.dumps(txn.serialize())))
